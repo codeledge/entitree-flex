@@ -4,16 +4,28 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Entiflex!</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.1.1/svg.min.js"></script>
   </head>
   <body>
     <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+      }
+      svg {
+        border: 1px solid grey;
+        height: 100vh;
+        width: 100vw;
+      }
       path {
         stroke: black;
       }
     </style>
-    <div id="drawing" style="border: 1px solid black"></div>
-    <script src="./tree.js"></script>
+    <div id="drawing"></div>
+
+    <script src="./bundle.js"></script>
   </body>
 </html>
