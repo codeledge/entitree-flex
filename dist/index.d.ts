@@ -1,6 +1,6 @@
-declare type Options = {
-    defaultNodeWidth?: number;
-    defaultNodeHeight: number;
+declare type Settings = {
+  defaultNodeWidth?: number;
+  defaultNodeHeight: number;
 };
-export default function layout(root: any, options?: Options): void;
+export default function layout(root: any, options?: Settings): void;
 export {};

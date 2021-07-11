@@ -4,11 +4,13 @@ const { randomTree } = require("../fixtures/randomTree");
 
 var draw = SVG().addTo("body");
 
+//const tree = niceTree;
 const tree = randomTree();
 
 layout(tree, {
   rootX: window.innerWidth / 2,
   rootY: window.innerHeight / 2,
+  verticalSpacing: 20,
 });
 
 console.log(tree);
@@ -22,8 +24,27 @@ function drawPaths(subtree) {
       sourceNode.y + sourceNode.height
     } L${targetNode.x + targetNode.width / 2} ${targetNode.y}`;
   }
+  function getSameD(sourceNode, targetNode) {
+    const left = sourceNode.x < targetNode.x ? sourceNode : targetNode;
+    const right = sourceNode.x < targetNode.x ? targetNode : sourceNode;
+    return `M${left.x + left.width} ${left.y + left.height / 2} L${right.x} ${
+      right.y + right.height / 2
+    }`;
+  }
   drill(subtree);
   function drill(subtree) {
+    if (subtree.siblings) {
+      subtree.siblings.forEach((target, index) => {
+        draw.path(getSameD(subtree, target));
+      });
+    }
+
+    if (subtree.partners) {
+      subtree.partners.forEach((target, index) => {
+        draw.path(getSameD(subtree, target));
+      });
+    }
+
     if (subtree.children) {
       subtree.children.forEach((child, index) => {
         draw.path(getPathD(subtree, child));
@@ -40,26 +61,42 @@ function drawPaths(subtree) {
   }
 }
 
+function drawNode(node) {
+  draw
+    .rect(
+      node.width + (node.marginRight || 0),
+      node.height + (node.marginBottom || 0)
+    )
+    .move(node.x, node.y)
+    .radius(3)
+    .opacity(0.1)
+    .fill(stringToColour(node.name));
+
+  draw
+    .rect(node.width, node.height)
+    .radius(3)
+    .move(node.x, node.y)
+    .fill(stringToColour(node.name));
+
+  //draw.text(node.name).move(node.x, node.y);
+}
+
 function drawNodes(subtree) {
   drill(subtree);
   function drill(subtree) {
-    draw
-      .rect(
-        subtree.width + (subtree.marginRight || 0),
-        subtree.height + (subtree.marginBottom || 0)
-      )
-      .move(subtree.x, subtree.y)
-      .radius(3)
-      .opacity(0.1)
-      .fill(stringToColour(subtree.name));
+    drawNode(subtree);
 
-    draw
-      .rect(subtree.width, subtree.height)
-      .radius(3)
-      .move(subtree.x, subtree.y)
-      .fill(stringToColour(subtree.name));
+    if (subtree.siblings) {
+      subtree.siblings.forEach((target, index) => {
+        drawNode(target);
+      });
+    }
 
-    //draw.text(subtree.name).move(subtree.x, subtree.y);
+    if (subtree.partners) {
+      subtree.partners.forEach((target, index) => {
+        drawNode(target);
+      });
+    }
 
     if (subtree.children) {
       subtree.children.forEach((node, index) => {

@@ -1,4 +1,4 @@
-import { TreeNode } from "./../src/index";
+import { TreeNode } from "./../src/TreeNode";
 import { randomInt } from "./randomInt";
 import { randomNode } from "./randomNode";
 

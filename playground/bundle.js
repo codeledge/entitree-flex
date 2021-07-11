@@ -28,18 +28,28 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.randomTargets = exports.randomNode = void 0;
+exports.randomTargets = exports.randomSides = exports.randomNode = void 0;
 var randomInt_1 = require("./randomInt");
 var randomName_1 = require("./randomName");
 var randomNode = function (_a) {
-    var childDepth = _a.childDepth, parentDepth = _a.parentDepth;
-    return (__assign(__assign({ width: randomInt_1.randomInt(20, 80), height: randomInt_1.randomInt(20, 80), name: randomName_1.randomName() }, (childDepth && {
+    var childDepth = _a.childDepth, parentDepth = _a.parentDepth, noSiblings = _a.noSiblings, noPartners = _a.noPartners;
+    return (__assign(__assign(__assign(__assign({ width: randomInt_1.randomInt(20, 80), height: randomInt_1.randomInt(20, 80), name: randomName_1.randomName() }, (childDepth && {
         children: exports.randomTargets({ childDepth: childDepth - 1, parentDepth: 0 }),
     })), (parentDepth && {
         parents: exports.randomTargets({ parentDepth: parentDepth - 1, childDepth: 0 }),
+    })), (!noSiblings && {
+        siblings: exports.randomSides(),
+    })), (!noPartners && {
+        partners: exports.randomSides(),
     })));
 };
 exports.randomNode = randomNode;
+var randomSides = function () {
+    return new Array(randomInt_1.randomInt(0, 2)).fill(0).map(function () {
+        return exports.randomNode({ noPartners: true, noSiblings: true });
+    });
+};
+exports.randomSides = randomSides;
 var randomTargets = function (_a) {
     var childDepth = _a.childDepth, parentDepth = _a.parentDepth;
     return new Array(randomInt_1.randomInt(1, 4)).fill(0).map(function () {
@@ -80,11 +90,13 @@ const { randomTree } = require("../fixtures/randomTree");
 
 var draw = SVG().addTo("body");
 
+//const tree = niceTree;
 const tree = randomTree();
 
 layout(tree, {
   rootX: window.innerWidth / 2,
   rootY: window.innerHeight / 2,
+  verticalSpacing: 20,
 });
 
 console.log(tree);
@@ -98,8 +110,27 @@ function drawPaths(subtree) {
       sourceNode.y + sourceNode.height
     } L${targetNode.x + targetNode.width / 2} ${targetNode.y}`;
   }
+  function getSameD(sourceNode, targetNode) {
+    const left = sourceNode.x < targetNode.x ? sourceNode : targetNode;
+    const right = sourceNode.x < targetNode.x ? targetNode : sourceNode;
+    return `M${left.x + left.width} ${left.y + left.height / 2} L${right.x} ${
+      right.y + right.height / 2
+    }`;
+  }
   drill(subtree);
   function drill(subtree) {
+    if (subtree.siblings) {
+      subtree.siblings.forEach((target, index) => {
+        draw.path(getSameD(subtree, target));
+      });
+    }
+
+    if (subtree.partners) {
+      subtree.partners.forEach((target, index) => {
+        draw.path(getSameD(subtree, target));
+      });
+    }
+
     if (subtree.children) {
       subtree.children.forEach((child, index) => {
         draw.path(getPathD(subtree, child));
@@ -116,26 +147,42 @@ function drawPaths(subtree) {
   }
 }
 
+function drawNode(node) {
+  draw
+    .rect(
+      node.width + (node.marginRight || 0),
+      node.height + (node.marginBottom || 0)
+    )
+    .move(node.x, node.y)
+    .radius(3)
+    .opacity(0.1)
+    .fill(stringToColour(node.name));
+
+  draw
+    .rect(node.width, node.height)
+    .radius(3)
+    .move(node.x, node.y)
+    .fill(stringToColour(node.name));
+
+  //draw.text(node.name).move(node.x, node.y);
+}
+
 function drawNodes(subtree) {
   drill(subtree);
   function drill(subtree) {
-    draw
-      .rect(
-        subtree.width + (subtree.marginRight || 0),
-        subtree.height + (subtree.marginBottom || 0)
-      )
-      .move(subtree.x, subtree.y)
-      .radius(3)
-      .opacity(0.1)
-      .fill(stringToColour(subtree.name));
+    drawNode(subtree);
 
-    draw
-      .rect(subtree.width, subtree.height)
-      .radius(3)
-      .move(subtree.x, subtree.y)
-      .fill(stringToColour(subtree.name));
+    if (subtree.siblings) {
+      subtree.siblings.forEach((target, index) => {
+        drawNode(target);
+      });
+    }
 
-    //draw.text(subtree.name).move(subtree.x, subtree.y);
+    if (subtree.partners) {
+      subtree.partners.forEach((target, index) => {
+        drawNode(target);
+      });
+    }
 
     if (subtree.children) {
       subtree.children.forEach((node, index) => {
@@ -169,22 +216,33 @@ function stringToColour(str) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     name: "roots",
+    siblings: [
+        { name: "pane", height: 10 },
+        { name: "carru", height: 80 },
+    ],
+    partners: [{ name: "please" }, { name: "marry" }],
     children: [
         {
             name: "pino",
             width: 112,
             height: 40,
+            partners: [
+                {
+                    name: "sbs",
+                },
+            ],
             children: [
                 {
                     name: "stronz",
                     children: [
                         {
                             name: "sAt2",
-                            width: 22,
+                            width: 32,
                         },
                         {
                             name: "stron3",
                             width: 22,
+                            height: 30,
                             children: [
                                 {
                                     name: "sok",
@@ -197,6 +255,8 @@ exports.default = {
                 {
                     name: "ronz",
                     height: 180,
+                    siblings: [{ name: "sca" }, { name: "ka" }],
+                    partners: [{ name: "zu" }, { name: "lu" }],
                     children: [
                         {
                             name: "akn1",
@@ -238,6 +298,13 @@ exports.default = {
                     children: [
                         {
                             name: "cane",
+                            partners: [
+                                {
+                                    name: "vvv",
+                                    width: 82,
+                                    height: 82,
+                                },
+                            ],
                         },
                     ],
                 },
@@ -267,6 +334,12 @@ exports.default = {
             parents: [
                 {
                     name: "pasta",
+                    height: 33,
+                    partners: [
+                        {
+                            name: "wow",
+                        },
+                    ],
                 },
                 {
                     name: "farro",
@@ -283,15 +356,32 @@ exports.default = {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTargetNodesSize = void 0;
-var addTargetNodesSize = function (nodes, config) {
+var addTargetNodesSize = function (nodes, settings) {
     nodes.forEach(function (node, index) {
-        node.width = node.width || config.defaultNodeWidth;
-        node.height = node.height || config.defaultNodeHeight;
-        node.marginRight = config.siblingSpacing;
-        if (index === nodes.length - 1)
-            node.marginRight = config.cousinSpacing;
-        //todo, cousins
-        node.marginBottom = config.verticalSpacing;
+        var siblings = node[settings.siblingsAccessor];
+        var partners = node[settings.partnersAccessor];
+        siblings === null || siblings === void 0 ? void 0 : siblings.forEach(function (sibling) {
+            sibling.width = sibling.width || settings.defaultNodeWidth;
+            sibling.height = sibling.height || settings.defaultNodeHeight;
+            sibling.marginRight = settings.siblingSpacing; //todo: check
+            sibling.marginBottom = settings.verticalSpacing;
+        });
+        partners === null || partners === void 0 ? void 0 : partners.forEach(function (partner, partnerIndex) {
+            partner.width = partner.width || settings.defaultNodeWidth;
+            partner.height = partner.height || settings.defaultNodeHeight;
+            if (partnerIndex === partners.length - 1)
+                partner.marginRight = settings.cousinSpacing;
+            else
+                partner.marginRight = settings.siblingSpacing;
+            partner.marginBottom = settings.verticalSpacing;
+        });
+        node.width = node.width || settings.defaultNodeWidth;
+        node.height = node.height || settings.defaultNodeHeight;
+        if (index === nodes.length - 1 && (!partners || !partners.length))
+            node.marginRight = settings.cousinSpacing;
+        else
+            node.marginRight = settings.siblingSpacing;
+        node.marginBottom = settings.verticalSpacing;
     });
 };
 exports.addTargetNodesSize = addTargetNodesSize;
@@ -300,24 +390,48 @@ exports.addTargetNodesSize = addTargetNodesSize;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.centerSourceToTargets = void 0;
+var last_1 = require("./last");
 var centerSourceToTargets = function (source, targets) {
+    var _a, _b;
     if (!source.isRoot) {
-        var lastTarget = targets[targets.length - 1];
-        if (targets[0] && lastTarget)
-            source.x =
-                (targets[0].x + lastTarget.x + lastTarget.width) / 2 - source.width / 2;
+        //center only on actual children, not all generational nodes
+        var leftMostTarget = targets[0];
+        var rightMostTarget = last_1.last(targets);
+        if (leftMostTarget && rightMostTarget) {
+            var newSourceX = (leftMostTarget.x + rightMostTarget.x + rightMostTarget.width) / 2 -
+                source.width / 2;
+            var delta_1 = newSourceX - source.x;
+            if (newSourceX !== source.x) {
+                source.x += delta_1;
+                (_a = source.siblings) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) { return (sibling.x += delta_1); });
+                (_b = source.partners) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) { return (partner.x += delta_1); });
+            }
+        }
     }
 };
 exports.centerSourceToTargets = centerSourceToTargets;
 
-},{}],9:[function(require,module,exports){
+},{"./last":11}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInitialTargetsShiftLeft = void 0;
-var getInitialTargetsShiftLeft = function (source, targets) {
+var getInitialTargetsShiftLeft = function (source, targets, settings) {
     return (targets.reduce(function (totalWidth, target, index) {
+        var siblings = target[settings.siblingsAccessor];
+        var partners = target[settings.partnersAccessor];
+        siblings === null || siblings === void 0 ? void 0 : siblings.forEach(function (node) {
+            totalWidth += node.width + node.marginRight;
+        });
         totalWidth +=
-            target.width + (index < targets.length - 1 ? target.marginRight : 0);
+            target.width +
+                (index === targets.length - 1 && (!partners || !partners.length)
+                    ? 0
+                    : target.marginRight);
+        partners === null || partners === void 0 ? void 0 : partners.forEach(function (partner, partnerIndex) {
+            totalWidth +=
+                partner.width +
+                    (partnerIndex < partner.length - 1 ? partner.marginRight : 0);
+        });
         return totalWidth;
     }, 0) /
         2 -
@@ -354,122 +468,228 @@ exports.defaultSettings = {
     enableFlex: true,
     parentAccessor: "parent",
     parentsAccessor: "parents",
+    partnersAccessor: "partners",
     rootX: 0,
     rootY: 0,
+    siblingsAccessor: "siblings",
     siblingSpacing: 10,
     verticalSpacing: 10,
 };
-function layout(root, options) {
-    if (options === void 0) { options = {}; }
-    var config = __assign(__assign({}, exports.defaultSettings), options);
-    root.x = config.rootX;
-    root.y = config.rootY;
-    root.width = root.width || config.defaultNodeWidth;
-    root.height = root.height || config.defaultNodeHeight;
-    root.marginBottom = config.verticalSpacing;
+function layout(root, customSettings) {
+    var _a, _b;
+    if (customSettings === void 0) { customSettings = {}; }
+    var settings = __assign(__assign({}, exports.defaultSettings), customSettings);
+    root.x = settings.rootX;
+    root.y = settings.rootY;
     root.isRoot = true;
-    var childrenContour = [];
+    addTargetNodesSize_1.addTargetNodesSize([root], settings);
+    root.topLineY = root.y;
+    root.bottomLineY = root.y + root.height + root.marginBottom;
+    (_a = root[settings.siblingsAccessor]) === null || _a === void 0 ? void 0 : _a.reverse().forEach(function (sibling, siblingIndex, rootSiblings) {
+        sibling.source = root;
+        var nextNode = rootSiblings[siblingIndex - 1] || root;
+        sibling.x = nextNode.x - sibling.width - sibling.marginRight;
+        //align vertically
+        sibling.y = root.y + root.height / 2 - sibling.height / 2;
+        var outerBottomY = sibling.y + sibling.height + sibling.marginBottom;
+        if (sibling.y < root.topLineY)
+            root.topLineY = sibling.y;
+        if (outerBottomY > root.bottomLineY)
+            root.bottomLineY = outerBottomY;
+    });
+    (_b = root[settings.partnersAccessor]) === null || _b === void 0 ? void 0 : _b.forEach(function (partner, partnerIndex, rootPartners) {
+        partner.source = root;
+        var previousPartner = rootPartners[partnerIndex - 1] || root;
+        partner.x =
+            previousPartner.x + previousPartner.width + previousPartner.marginRight;
+        partner.y = root.y + root.height / 2 - partner.height / 2;
+        var outerBottomY = partner.y + partner.height + partner.marginBottom;
+        if (partner.y < root.topLineY)
+            root.topLineY = partner.y;
+        if (outerBottomY > root.bottomLineY)
+            root.bottomLineY = outerBottomY;
+    });
+    var descendantsContour = [];
     drillChildren(root);
     function drillChildren(subtree) {
-        var targets = subtree[config.childrenAccessor];
-        if (!targets || !targets.length)
+        var children = subtree[settings.childrenAccessor];
+        if (!children || !children.length)
             return;
-        var childrenBaseLineY = subtree.y + subtree.height + config.verticalSpacing;
-        addTargetNodesSize_1.addTargetNodesSize(targets, config);
-        var source = subtree;
-        targets.forEach(function (target, index) {
-            target.isDescendant = true;
-            target[config.parentAccessor] = subtree;
-            if (index === 0) {
-                var initialShiftLeft = getInitialTargetsShiftLeft_1.getInitialTargetsShiftLeft(source, targets);
-                target.x = source.x - initialShiftLeft;
-            }
-            else {
-                var previousSibling = targets[index - 1];
-                target.x =
-                    previousSibling.x +
-                        previousSibling.width +
-                        previousSibling.marginRight;
-            }
-            target.y = childrenBaseLineY;
-            //check if touches one of the contours
-            childrenContour.forEach(function (contourNode) {
-                shiftFromCountour_1.shiftFromCountour(contourNode, target);
+        //rename to addGenerationSizes
+        addTargetNodesSize_1.addTargetNodesSize(children, settings);
+        var initialShiftLeft = getInitialTargetsShiftLeft_1.getInitialTargetsShiftLeft(subtree, children, settings);
+        var currentX = subtree.x - initialShiftLeft;
+        var topLineY = getGenerationBottomLineY(subtree);
+        children.forEach(function (child) {
+            var _a, _b;
+            var maxHeight = getGenerationMaxHeight(child);
+            var midVerticalY = topLineY + maxHeight / 2;
+            /////////////////// SIBLING
+            (_a = child[settings.siblingsAccessor]) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) {
+                sibling.isSibling = true;
+                sibling.source = child;
+                sibling.x = currentX;
+                sibling.y = midVerticalY - sibling.height / 2;
+                checkContourOverlap(descendantsContour, sibling);
+                currentX = sibling.x + sibling.width + sibling.marginRight;
             });
-            childrenContour.push(target);
-            drillChildren(target);
+            /////////////////// CHILD
+            //set props
+            child.isDescendant = true;
+            //set the parent pointer
+            child.source = subtree;
+            //Set positions
+            child.x = currentX;
+            child.y = midVerticalY - child.height / 2;
+            checkContourOverlap(descendantsContour, child);
+            currentX = child.x + child.width + child.marginRight;
+            /////////////////// partners
+            (_b = child[settings.partnersAccessor]) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) {
+                partner.isPartner = true;
+                partner.source = child;
+                partner.x = currentX;
+                partner.y = midVerticalY - partner.height / 2;
+                checkContourOverlap(descendantsContour, partner);
+                currentX = partner.x + partner.width + partner.marginRight;
+            });
+            drillChildren(child);
         });
-        centerSourceToTargets_1.centerSourceToTargets(source, targets);
+        centerSourceToTargets_1.centerSourceToTargets(subtree, children);
     }
-    normalizeTree_1.normalizeTree(root, config.childrenAccessor);
+    normalizeTree_1.normalizeTree(root, settings.childrenAccessor);
     var parentsContour = [];
     drillParents(root);
     function drillParents(subtree) {
-        var targets = subtree[config.parentsAccessor];
-        if (!targets)
+        var parents = subtree[settings.parentsAccessor];
+        if (!parents)
             return;
-        var baselineY = subtree.y;
-        addTargetNodesSize_1.addTargetNodesSize(targets, config);
-        var source = subtree;
-        targets.forEach(function (target, index) {
-            target.isAncestor = true;
-            target[config.childAccessor] = subtree;
-            if (index === 0) {
-                var initialShiftLeft = getInitialTargetsShiftLeft_1.getInitialTargetsShiftLeft(source, targets);
-                target.x = source.x - initialShiftLeft;
-            }
-            else {
-                var previousSibling = targets[index - 1];
-                target.x =
-                    previousSibling.x +
-                        previousSibling.width +
-                        previousSibling.marginRight;
-            }
-            target.y = baselineY - target.height - target.marginBottom;
-            var parentLeftBorder = {
-                x: target.x,
-                topY: target.y,
-                bottomY: baselineY,
-            };
-            //check if touches one of the contours
-            parentsContour.forEach(function (contourNode) {
-                shiftFromCountour_1.shiftFromCountour(contourNode, target);
+        addTargetNodesSize_1.addTargetNodesSize(parents, settings);
+        var initialShiftLeft = getInitialTargetsShiftLeft_1.getInitialTargetsShiftLeft(subtree, parents, settings);
+        var currentX = subtree.x - initialShiftLeft;
+        var bottomLineY = getGenerationTopLineY(subtree);
+        console.log({ bottomLineY: bottomLineY });
+        parents.forEach(function (parent) {
+            var _a, _b;
+            var maxHeight = getGenerationMaxHeight(parent);
+            var midVerticalY = bottomLineY - settings.verticalSpacing - maxHeight / 2;
+            /////////////////// SIBLING
+            (_a = parent[settings.siblingsAccessor]) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) {
+                sibling.isSibling = true;
+                sibling.source = parent;
+                sibling.x = currentX;
+                sibling.y = midVerticalY - sibling.height / 2;
+                checkContourOverlap(parentsContour, sibling);
+                currentX = sibling.x + sibling.width + sibling.marginRight;
             });
-            parentsContour.push(target);
-            drillParents(target);
+            ///////////// PARENT
+            parent.isAncestor = true;
+            parent.source = subtree;
+            //set positions
+            parent.x = currentX;
+            parent.y = midVerticalY - parent.height / 2;
+            //check if touches one of the contours
+            checkContourOverlap(parentsContour, parent);
+            currentX = parent.x + parent.width + parent.marginRight;
+            /////////////////// partners
+            (_b = parent[settings.partnersAccessor]) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) {
+                partner.isPartner = true;
+                partner.source = parent;
+                partner.x = currentX;
+                partner.y = midVerticalY - partner.height / 2;
+                checkContourOverlap(parentsContour, partner);
+                currentX = partner.x + partner.width + partner.marginRight;
+            });
+            drillParents(parent);
         });
-        centerSourceToTargets_1.centerSourceToTargets(source, targets);
+        centerSourceToTargets_1.centerSourceToTargets(subtree, parents);
     }
-    normalizeTree_1.normalizeTree(root, config.parentsAccessor);
+    normalizeTree_1.normalizeTree(root, settings.parentsAccessor);
 }
 exports.default = layout;
+function getGenerationBottomLineY(subtree) {
+    var _a, _b;
+    var bottomLineY = subtree.y + subtree.height + subtree.marginBottom;
+    (_a = subtree.siblings) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) {
+        bottomLineY = Math.max(bottomLineY, sibling.y + sibling.height + sibling.marginBottom);
+    });
+    (_b = subtree.partners) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) {
+        bottomLineY = Math.max(bottomLineY, partner.y + partner.height + partner.marginBottom);
+    });
+    return bottomLineY;
+}
+function getGenerationTopLineY(subtree) {
+    var _a, _b;
+    var topLineY = subtree.y;
+    (_a = subtree.siblings) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) {
+        topLineY = Math.min(topLineY, sibling.y);
+    });
+    (_b = subtree.partners) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) {
+        topLineY = Math.min(topLineY, partner.y);
+    });
+    return topLineY;
+}
+function getGenerationMaxHeight(subtree) {
+    var _a, _b;
+    var maxHeight = subtree.height;
+    (_a = subtree.siblings) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) {
+        maxHeight = Math.max(maxHeight, sibling.height);
+    });
+    (_b = subtree.partners) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) {
+        maxHeight = Math.max(maxHeight, partner.height);
+    });
+    return maxHeight;
+}
+function checkContourOverlap(contourSet, node) {
+    contourSet.forEach(function (contourNode) {
+        shiftFromCountour_1.shiftFromCountour(contourNode, node);
+    });
+    contourSet.push(node);
+}
 
-},{"./addTargetNodesSize":7,"./centerSourceToTargets":8,"./getInitialTargetsShiftLeft":9,"./normalizeTree":11,"./shiftFromCountour":12}],11:[function(require,module,exports){
+},{"./addTargetNodesSize":7,"./centerSourceToTargets":8,"./getInitialTargetsShiftLeft":9,"./normalizeTree":12,"./shiftFromCountour":13}],11:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.last = void 0;
+var last = function (array) {
+    return array === null || array === void 0 ? void 0 : array[array.length - 1];
+};
+exports.last = last;
+
+},{}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.normalizeTree = void 0;
+var last_1 = require("./last");
 var normalizeTree = function (root, accessor) {
+    var _a, _b;
     var targets = root[accessor];
     if (!targets || !targets.length)
         return;
     var rootCenter = root.x + root.width / 2;
-    var lastTarget = targets[targets.length - 1];
-    var centerPoint = (targets[0].x + lastTarget.x + lastTarget.width) / 2;
+    var leftMostNode = ((_a = targets[0].siblings) === null || _a === void 0 ? void 0 : _a[0])
+        ? (_b = targets[0].siblings) === null || _b === void 0 ? void 0 : _b[0]
+        : targets[0];
+    var lastTarget = last_1.last(targets);
+    var lastTargetPartner = last_1.last(lastTarget.partners);
+    var rightMostNode = lastTargetPartner ? lastTargetPartner : lastTarget;
+    var centerPoint = (leftMostNode.x + rightMostNode.x + rightMostNode.width) / 2;
     var shift = centerPoint - rootCenter;
     targets.forEach(function (node) {
         drillTargets(node);
     });
     function drillTargets(subtree) {
-        var _a;
+        var _a, _b, _c;
         subtree.x -= shift;
-        (_a = subtree[accessor]) === null || _a === void 0 ? void 0 : _a.forEach(function (node) {
+        (_a = subtree.siblings) === null || _a === void 0 ? void 0 : _a.forEach(function (sibling) { return (sibling.x -= shift); });
+        (_b = subtree.partners) === null || _b === void 0 ? void 0 : _b.forEach(function (partner) { return (partner.x -= shift); });
+        (_c = subtree[accessor]) === null || _c === void 0 ? void 0 : _c.forEach(function (node) {
             drillTargets(node);
         });
     }
 };
 exports.normalizeTree = normalizeTree;
 
-},{}],12:[function(require,module,exports){
+},{"./last":11}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.shiftFromCountour = void 0;

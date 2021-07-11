@@ -1,21 +1,32 @@
 export default {
   name: "roots",
+  siblings: [
+    { name: "pane", height: 10 },
+    { name: "carru", height: 80 },
+  ],
+  partners: [{ name: "please" }, { name: "marry" }],
   children: [
     {
       name: "pino",
       width: 112,
       height: 40,
+      partners: [
+        {
+          name: "sbs",
+        },
+      ],
       children: [
         {
           name: "stronz",
           children: [
             {
               name: "sAt2",
-              width: 22,
+              width: 32,
             },
             {
               name: "stron3",
               width: 22,
+              height: 30,
               children: [
                 {
                   name: "sok",
@@ -28,6 +39,8 @@ export default {
         {
           name: "ronz",
           height: 180,
+          siblings: [{ name: "sca" }, { name: "ka" }],
+          partners: [{ name: "zu" }, { name: "lu" }],
           children: [
             {
               name: "akn1",
@@ -69,6 +82,13 @@ export default {
           children: [
             {
               name: "cane",
+              partners: [
+                {
+                  name: "vvv",
+                  width: 82,
+                  height: 82,
+                },
+              ],
             },
           ],
         },
@@ -98,6 +118,12 @@ export default {
       parents: [
         {
           name: "pasta",
+          height: 33,
+          partners: [
+            {
+              name: "wow",
+            },
+          ],
         },
         {
           name: "farro",

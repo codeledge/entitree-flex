@@ -1,4 +1,4 @@
-import { TreeNode } from "./index";
+import { TreeNode } from "./TreeNode";
 
 export const shiftFromCountour = (contourNode: TreeNode, node: TreeNode) => {
   const nodeBottomY = node.y + node.height + node.marginBottom;
