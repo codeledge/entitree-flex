@@ -1,4 +1,4 @@
-# tidytree
+# entitree-flex
 
 In a paper from 2013, A.J. van der Ploeg enhanced the algorithm to allow
 for variable-sized nodes, while keeping its linear runtime nature. He
@@ -6,71 +6,90 @@ described the algorithm in his paper, [Drawing Non-layered Tidy Trees in
 Linear Time](https://core.ac.uk/download/pdf/301654972.pdf). The author also provided a working Java application
 on GitHub at https://github.com/cwi-swat/non-layered-tidy-trees
 
-## examples in javascript
-
-https://github.com/d3/d3-hierarchy/blob/main/src/tree.js
-https://github.com/Klortho/d3-flextree
-
-### Examples
-
-`x` root
-
-`p` parent
-
-`c` child
-
-`s` spouse/sibling
-
-Single child/parent
+## Install
 
 ```
-   p
-   |
-   x
-   |
-   c
+npm i entitree-flex
 ```
 
-Root spouse/sibling
-
 ```
-  p
-  |
-s-x-s
-  |
-  c
+yarn add entitree-flex
 ```
 
-two children/parents
+It does come with TS definitions
+
+## Usage
 
 ```
- p   p
-  \ /
-   x
-  / \
- c   c
+const layout = require("entitree-flex").default
 ```
 
-Spouse of child
+or
 
 ```
-   x
-  / \
- c-s c
+import layout from "entitree-flex"
 ```
 
-Sibling of child
+```
+const tree = {
+  name: "root",
+  siblings: [
+    { name: "rootSibling1" },
+    { name: "rootSibling2"},
+  ],
+  partners: [{ name: "rootPartner1" }, { name: "rootPartner2" }],
+  children: [
+    {
+      name: "child1",
+      partners: [
+        {
+          name: "child1partner1",
+        },
+      ],
+      children: [
+        {
+          name: "grandchild1",
+          children: [
+            {
+              name: "grandGrandchild1",
+            },
+          ],
+        },
+        {
+          name: "grandchild2",
+        },
+      ],
+    },
+  ],
+  parents: [
+    {
+      name: "parent1",
+      parents: [
+        {
+          name: "grandParent1",
+        },
+        {
+          name: "grandParent2",
+        },
+      ],
+    },
+    {
+      name: "parent1",
+      parents: [
+        {
+          name: "grandparent1",
+        },
+      ],
+    },
+  ],
+};
 
-```
-    x
-   / \
-s-c   c
+layout(tree)
 ```
 
-Three children
+and the object will be populated with all the coordinates for a flexible, bidirectional, side-nodes supporting tree
 
-```
-   x
-  /|\
- c c c
-```
+## Similar examples in javascript
+
+- https://github.com/d3/d3-hierarchy no bidirectional, no flexible, no side nodes
+- https://github.com/Klortho/d3-flextree no bidirectional, no side nodes
