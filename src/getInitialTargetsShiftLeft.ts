@@ -1,15 +1,21 @@
-import { Settings } from "./index";
+import { Settings } from "./Settings";
 import { TreeNode } from "./TreeNode";
+import { getFromMap } from "./getFromMap";
 
-export const getInitialTargetsShiftLeft = (
-  source: TreeNode,
-  targets: TreeNode[],
-  settings: Settings
+export const getInitialTargetsShiftLeft = <T>(
+  source: TreeNode<T>,
+  targets: TreeNode<T>[],
+  settings: Settings,
+  map?: Record<string, T>
 ) => {
   return (
     targets.reduce((totalWidth, target, index) => {
-      const siblings = target[settings.siblingsAccessor];
-      const partners = target[settings.partnersAccessor];
+      const siblings = map
+        ? getFromMap(target[settings.siblingsAccessor], map)
+        : target[settings.siblingsAccessor];
+      const partners = map
+        ? getFromMap(target[settings.partnersAccessor], map)
+        : target[settings.partnersAccessor];
 
       siblings?.forEach((node) => {
         totalWidth += node.width + node.marginRight;

@@ -1,32 +1,38 @@
-import { Settings } from "./index";
+import { Settings } from "./Settings";
 import { TreeNode } from "./TreeNode";
+import { getFromMap } from "./getFromMap";
 
-export const addTargetNodesSize = (
-  nodes: TreeNode[],
-  settings: Settings
+export const addTargetNodesSize = <T>(
+  nodes: TreeNode<T>[],
+  settings: Settings,
+  map?: Record<string, T>
 ): void => {
   nodes.forEach((node, index) => {
-    const siblings = node[settings.siblingsAccessor];
-    const partners = node[settings.partnersAccessor];
+    const siblings = map
+      ? getFromMap(node[settings.siblingsAccessor], map)
+      : node[settings.siblingsAccessor];
 
     siblings?.forEach((sibling) => {
-      sibling.width = sibling.width || settings.defaultNodeWidth;
-      sibling.height = sibling.height || settings.defaultNodeHeight;
+      sibling.width = sibling.width || settings.nodeWidth;
+      sibling.height = sibling.height || settings.nodeHeight;
       sibling.marginRight = settings.siblingSpacing; //todo: check
       sibling.marginBottom = settings.verticalSpacing;
     });
 
+    const partners = map
+      ? getFromMap(node[settings.partnersAccessor], map)
+      : node[settings.partnersAccessor];
     partners?.forEach((partner, partnerIndex) => {
-      partner.width = partner.width || settings.defaultNodeWidth;
-      partner.height = partner.height || settings.defaultNodeHeight;
+      partner.width = partner.width || settings.nodeWidth;
+      partner.height = partner.height || settings.nodeHeight;
       if (partnerIndex === partners.length - 1)
         partner.marginRight = settings.cousinSpacing;
       else partner.marginRight = settings.siblingSpacing;
       partner.marginBottom = settings.verticalSpacing;
     });
 
-    node.width = node.width || settings.defaultNodeWidth;
-    node.height = node.height || settings.defaultNodeHeight;
+    node.width = node.width || settings.nodeWidth;
+    node.height = node.height || settings.nodeHeight;
 
     if (index === nodes.length - 1 && (!partners || !partners.length))
       node.marginRight = settings.cousinSpacing;

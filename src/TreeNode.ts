@@ -1,4 +1,8 @@
-export interface TreeNode extends Record<string, any> {
+export type TreeNode<T extends {}> = T & {
+  siblings?: TreeNode<T>[];
+  parents?: TreeNode<T>[];
+  children?: TreeNode<T>[];
+  partners?: TreeNode<T>[];
   bottomLineY: number;
   height: number;
   isAncestor?: boolean;
@@ -10,4 +14,4 @@ export interface TreeNode extends Record<string, any> {
   width: number;
   x: number;
   y: number;
-}
+};

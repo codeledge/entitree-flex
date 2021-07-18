@@ -1,6 +1,9 @@
 import { TreeNode } from "./TreeNode";
 
-export const shiftFromCountour = (contourNode: TreeNode, node: TreeNode) => {
+export const shiftFromCountour = <T>(
+  contourNode: TreeNode<T>,
+  node: TreeNode<T>
+) => {
   const nodeBottomY = node.y + node.height + node.marginBottom;
 
   const contourNodeEdgeX =
