@@ -1,4 +1,5 @@
 import { Settings } from "./Settings";
+import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
 import { last } from "./last";
@@ -7,7 +8,7 @@ export const normalizeTree = <T>(
   root: TreeNode<T>,
   accessor: string,
   settings: Settings,
-  map?: Record<string, T>
+  map?: TreeMap<T>
 ) => {
   const targets: TreeNode<T>[] = map
     ? getFromMap(root[accessor], map)
@@ -16,8 +17,8 @@ export const normalizeTree = <T>(
   const rootCenter = root.x + root.width / 2;
 
   const firstTargetSiblings = map
-    ? getFromMap(targets[0][settings.siblingsAccessor], map)
-    : targets[0][settings.siblingsAccessor];
+    ? getFromMap(targets[0][settings.nextBeforeAccessor], map)
+    : targets[0][settings.nextBeforeAccessor];
 
   const leftMostNode = firstTargetSiblings?.[0]
     ? firstTargetSiblings?.[0]
@@ -25,8 +26,8 @@ export const normalizeTree = <T>(
 
   const lastTarget = last(targets);
   const lastTargetPartner = map
-    ? last(getFromMap(lastTarget[settings.partnersAccessor], map))
-    : last(lastTarget[settings.partnersAccessor]);
+    ? last(getFromMap(lastTarget[settings.nextAfterAccessor], map))
+    : last(lastTarget[settings.nextAfterAccessor]);
 
   const rightMostNode = lastTargetPartner ? lastTargetPartner : lastTarget;
 
@@ -42,16 +43,16 @@ export const normalizeTree = <T>(
     subtree.x -= shift;
 
     const siblings = map
-      ? getFromMap(subtree[settings.siblingsAccessor], map)
-      : subtree[settings.siblingsAccessor];
+      ? getFromMap(subtree[settings.nextBeforeAccessor], map)
+      : subtree[settings.nextBeforeAccessor];
 
     siblings?.forEach((sibling) => {
       sibling.x -= shift;
     });
 
     const partners = map
-      ? getFromMap(subtree[settings.partnersAccessor], map)
-      : subtree[settings.partnersAccessor];
+      ? getFromMap(subtree[settings.nextAfterAccessor], map)
+      : subtree[settings.nextAfterAccessor];
     partners?.forEach((partner) => {
       partner.x -= shift;
     });

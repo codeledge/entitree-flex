@@ -1,13 +1,14 @@
 import { Settings } from "./Settings";
+import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
 import { last } from "./last";
 
-export const centerSourceToTargets = <T>(
+export const centerSourceToTargets = <T = void>(
   source: TreeNode<T>,
   targets: TreeNode<T>[],
   settings: Settings,
-  map?: Record<string, T>
+  map?: TreeMap<T>
 ) => {
   if (!source.isRoot) {
     //center only on actual children, not all generational nodes
@@ -24,13 +25,13 @@ export const centerSourceToTargets = <T>(
         source.x += delta;
 
         const siblings = map
-          ? getFromMap(source[settings.siblingsAccessor], map)
-          : source[settings.siblingsAccessor];
+          ? getFromMap(source[settings.nextBeforeAccessor], map)
+          : source[settings.nextBeforeAccessor];
         siblings?.forEach((sibling) => (sibling.x += delta));
 
         const partners = map
-          ? getFromMap(source[settings.partnersAccessor], map)
-          : source[settings.partnersAccessor];
+          ? getFromMap(source[settings.nextAfterAccessor], map)
+          : source[settings.nextAfterAccessor];
         partners?.forEach((partner) => (partner.x += delta));
       }
     }

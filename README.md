@@ -1,11 +1,14 @@
-
 # entitree-flex
 
-In a paper from 2013, A.J. van der Ploeg enhanced the algorithm to allow
+This is the core package that fuels the iconic https://www.entitree.com website!
+
+In a paper from 2013, A.J. van der Ploeg enhanced the Tidy Tree (Reingold-Tilford) algorithm to allow
 for variable-sized nodes, while keeping its linear runtime nature. He
 described the algorithm in his paper, [Drawing Non-layered Tidy Trees in
 Linear Time](https://core.ac.uk/download/pdf/301654972.pdf). The author also provided a working Java application
 on GitHub at https://github.com/cwi-swat/non-layered-tidy-trees
+
+This package take it to the next level by allowing also side nodes, very useful if you are drawing family trees and pedigrees.
 
 ## Examples
 
@@ -20,27 +23,25 @@ on GitHub at https://github.com/cwi-swat/non-layered-tidy-trees
 npm i entitree-flex
 ```
 
+OR
+
 ```
 yarn add entitree-flex
 ```
 
 It does come with TS definitions
 
-## Usage
+## Usage from nested object
 
 ```
-const layout = require("entitree-flex").default
-```
+const { layoutFromNested } = require("entitree-flex")
+//or
+import { layoutFromNested } from "entitree-flex"
 
-or
-
-```
-import layout from "entitree-flex"
-```
-
-```
 const tree = {
   name: "root",
+  width: 60,
+  height: 20,
   siblings: [
     { name: "rootSibling1" },
     { name: "rootSibling2"},
@@ -49,6 +50,8 @@ const tree = {
   children: [
     {
       name: "child1",
+      width: 20,
+      height: 50,
       partners: [
         {
           name: "child1partner1",
@@ -92,10 +95,54 @@ const tree = {
   ],
 };
 
-layout(tree)
+layoutFromNested(tree [, settings])
 ```
 
 and the object will be populated with all the coordinates for a flexible, bidirectional, side-nodes supporting tree
+
+## Usage from flat object
+
+```
+const { layoutFromMap } = require("entitree-flex")
+//or
+import { layoutFromMap } from "entitree-flex"
+
+const flatTree = {
+  1: {
+    name: "root",
+    width: 14,
+    childrenIds: [2, 3],
+  },
+  2: { name: "child2" },
+  3: { name: "child3", childrenIds: [4, 5], spousesIds: [6] },
+  4: { name: "grandChild4" },
+  5: { name: "grandChild5" },
+  6: { name: "spouse of child 3" },
+};
+
+layoutFromMap(1, flatTree [, settings])
+```
+
+## Settings
+
+```
+defaultSettings = {
+  targetsAccessor: "children", // what prop to use to pick children
+  differentGroupSpacing: 20, // spacing in px between "cousins"
+  nodeHeight: 40, // default node height in px
+  nodeWidth: 40, // default node width in px
+  enableFlex: true, // has slightly better perfomance if turned off (node.width, node.height will not be read)
+  sourcesAccessor: "parents", // the prop used to go up the ancestors
+  nextAfterAccessor: "partners", // the side node prop used to go sideways, AFTER the current node
+  rootX: 0, // default root position
+  rootY: 0, // default root position
+  nextBeforeAccessor: "siblings", // the side node prop used to go sideways, BEFORE the current node
+  nextBeforeSpacing: 10,
+  nextAfterSpacing: 10,
+  sourceTargetSpacing: 10,
+  clone: false, // returns a clone, if your application does not allow editing the original object
+};
+```
 
 ## Similar examples in javascript
 

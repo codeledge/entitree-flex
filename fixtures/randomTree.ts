@@ -1,8 +1,8 @@
-import { TreeNode } from "./../src/TreeNode";
-import { randomInt } from "./randomInt";
-import { randomNode } from "./randomNode";
+import { RandomNode, randomNode } from "./randomNode";
 
-export const randomTree = (): TreeNode => {
+import { randomInt } from "./randomInt";
+
+export const randomTree = (): RandomNode => {
   return {
     ...randomNode({
       childDepth: randomInt(1, 3),

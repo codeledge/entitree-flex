@@ -1,6 +1,6 @@
 {
   "name": "entitree-flex",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Flexible Tree layout supporting ancestors, descendants and side nodes",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,5 +28,16 @@
     "tsify": "^5.0.4",
     "typescript": "^4.3.5",
     "watchify": "^4.0.0"
-  }
+  },
+  "keywords": [
+    "tree",
+    "dendrogram",
+    "treemap",
+    "layout",
+    "graph",
+    "children",
+    "parents",
+    "family",
+    "pedigree"
+  ]
 }

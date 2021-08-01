@@ -1,6 +1,7 @@
 import { Settings } from "./Settings";
+import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
-import { addTargetNodesSize } from "./addTargetNodesSize";
+import { addGenerationSizes } from "./addGenerationSizes";
 import { centerSourceToTargets } from "./centerSourceToTargets";
 import { checkContourOverlap } from "./checkContourOverlap";
 import { defaultSettings } from "./defaultSettings";
@@ -10,9 +11,10 @@ import { getGenerationBottomLineY } from "./getGenerationBottomLineY";
 import { getGenerationMaxHeight } from "./getGenerationMaxHeight";
 import { getGenerationTopLineY } from "./getGenerationTopLineY";
 import { getInitialTargetsShiftLeft } from "./getInitialTargetsShiftLeft";
+import { makeRoot } from "./makeRoot";
 import { normalizeTree } from "./normalizeTree";
 
-export function fromMap<T>(
+export function layoutFromMap<T>(
   rootId: string,
   originalMap: Record<string, T>,
   customSettings: Partial<Settings> = {}
@@ -22,25 +24,20 @@ export function fromMap<T>(
     ...customSettings,
   };
 
-  const map: Record<string, TreeNode<T>> = settings.clone
+  const map: TreeMap<T> = settings.clone
     ? JSON.parse(JSON.stringify(originalMap))
     : originalMap;
 
-  const root = map[rootId] as TreeNode<T>;
+  const root = makeRoot<T>(map[rootId], settings);
 
-  root.x = settings.rootX;
-  root.y = settings.rootY;
-  root.isRoot = true;
-
-  addTargetNodesSize<T>([root], settings, map);
+  addGenerationSizes<T>([root], settings, map);
   root.topLineY = root.y;
   root.bottomLineY = root.y + root.height + root.marginBottom;
 
-  if (root[settings.siblingsAccessor])
-    getFromMap(root[settings.siblingsAccessor], map)
+  if (root[settings.nextBeforeAccessor])
+    getFromMap(root[settings.nextBeforeAccessor], map)
       .reverse()
       .forEach((sibling, siblingIndex, rootSiblings) => {
-        sibling.source = root;
         const nextNode = rootSiblings[siblingIndex - 1] || root;
         sibling.x = nextNode.x - sibling.width - sibling.marginRight;
         //align vertically
@@ -51,10 +48,9 @@ export function fromMap<T>(
         if (outerBottomY > root.bottomLineY) root.bottomLineY = outerBottomY;
       });
 
-  if (root[settings.partnersAccessor])
-    getFromMap(root[settings.partnersAccessor], map).forEach(
+  if (root[settings.nextAfterAccessor])
+    getFromMap(root[settings.nextAfterAccessor], map).forEach(
       (partner, partnerIndex, rootPartners) => {
-        partner.source = root;
         const previousPartner = rootPartners[partnerIndex - 1] || root;
         partner.x =
           previousPartner.x +
@@ -70,11 +66,11 @@ export function fromMap<T>(
   const descendantsContour = [];
   drillChildren(root);
   function drillChildren(subtree: TreeNode<T>) {
-    const children = getFromMap(subtree[settings.childrenAccessor], map);
+    const children = getFromMap(subtree[settings.targetsAccessor], map);
     if (!children || !children.length) return;
 
     //rename to addGenerationSizes
-    addTargetNodesSize<T>(children, settings, map);
+    addGenerationSizes<T>(children, settings, map);
 
     const initialShiftLeft = getInitialTargetsShiftLeft<T>(
       subtree,
@@ -90,11 +86,8 @@ export function fromMap<T>(
       const maxHeight = getGenerationMaxHeight<T>(child, settings, map);
       const midVerticalY = topLineY + maxHeight / 2;
       /////////////////// SIBLING
-      const siblings = getFromMap(child[settings.siblingsAccessor], map);
+      const siblings = getFromMap(child[settings.nextBeforeAccessor], map);
       siblings?.forEach((sibling) => {
-        sibling.isSibling = true;
-        //sibling.source = child; ??
-
         sibling.x = currentX;
         sibling.y = midVerticalY - sibling.height / 2;
 
@@ -104,11 +97,6 @@ export function fromMap<T>(
       });
 
       /////////////////// CHILD
-      //set props
-      child.isDescendant = true;
-
-      //set the parent pointer
-      //child.sourceId = subtree.id; ??
 
       //Set positions
       child.x = currentX;
@@ -118,11 +106,8 @@ export function fromMap<T>(
       currentX = child.x + child.width + child.marginRight;
 
       /////////////////// partners
-      const partners = getFromMap(child[settings.partnersAccessor], map);
+      const partners = getFromMap(child[settings.nextAfterAccessor], map);
       partners?.forEach((partner) => {
-        partner.isPartner = true;
-        //partner.source = child; ??
-
         partner.x = currentX;
         partner.y = midVerticalY - partner.height / 2;
 
@@ -135,16 +120,16 @@ export function fromMap<T>(
 
     centerSourceToTargets<T>(subtree, children, settings, map);
   }
-  normalizeTree<T>(root, settings.childrenAccessor, settings, map);
+  normalizeTree<T>(root, settings.targetsAccessor, settings, map);
 
   const parentsContour = [];
   drillParents(root);
   function drillParents(subtree: TreeNode<T>) {
-    const parents = getFromMap(subtree[settings.parentsAccessor], map);
+    const parents = getFromMap(subtree[settings.sourcesAccessor], map);
 
     if (!parents?.length) return;
 
-    addTargetNodesSize<T>(parents, settings, map);
+    addGenerationSizes<T>(parents, settings, map);
 
     const initialShiftLeft = getInitialTargetsShiftLeft<T>(
       subtree,
@@ -159,15 +144,12 @@ export function fromMap<T>(
     parents.forEach((parent) => {
       const maxHeight = getGenerationMaxHeight<T>(parent, settings, map);
       const midVerticalY =
-        bottomLineY - settings.verticalSpacing - maxHeight / 2;
+        bottomLineY - settings.sourceTargetSpacing - maxHeight / 2;
 
       /////////////////// SIBLING
-      const siblings = getFromMap(parent[settings.siblingsAccessor], map);
+      const siblings = getFromMap(parent[settings.nextBeforeAccessor], map);
 
       siblings?.forEach((sibling) => {
-        sibling.isSibling = true;
-        //sibling.source = parent; ??
-
         sibling.x = currentX;
         sibling.y = midVerticalY - sibling.height / 2;
 
@@ -177,10 +159,6 @@ export function fromMap<T>(
       });
 
       ///////////// PARENT
-      parent.isAncestor = true;
-
-      //parent.source = subtree; ??
-
       //set positions
       parent.x = currentX;
       parent.y = midVerticalY - parent.height / 2;
@@ -190,10 +168,7 @@ export function fromMap<T>(
       currentX = parent.x + parent.width + parent.marginRight;
 
       /////////////////// partners
-      parent[settings.partnersAccessor]?.forEach((partner) => {
-        partner.isPartner = true;
-        //partner.source = parent; ??
-
+      parent[settings.nextAfterAccessor]?.forEach((partner) => {
         partner.x = currentX;
         partner.y = midVerticalY - partner.height / 2;
 
@@ -207,7 +182,7 @@ export function fromMap<T>(
 
     centerSourceToTargets<T>(subtree, parents, settings, map);
   }
-  normalizeTree<T>(root, settings.parentsAccessor, settings, map);
+  normalizeTree<T>(root, settings.sourcesAccessor, settings, map);
 
   return getElements(root, settings, map);
 }

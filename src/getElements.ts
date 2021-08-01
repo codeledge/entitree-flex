@@ -1,15 +1,17 @@
 import { Settings } from "./Settings";
+import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
+import { TreeRel } from "./TreeRel";
 import { getFromMap } from "./getFromMap";
 
 export const getElements = <T>(
   root: TreeNode<T>,
   settings: Settings,
-  map?: Record<string, TreeNode<T>>
+  map?: TreeMap<T>
 ): {
-  map: Record<string, TreeNode<T>>;
+  map: TreeMap<T>;
   nodes: TreeNode<T>[];
-  rels: { source: TreeNode<T>; target: TreeNode<T> }[];
+  rels: TreeRel<T>[];
   maxRight: number;
   maxLeft: number;
   maxBottom: number;
@@ -33,8 +35,8 @@ export const getElements = <T>(
   drill(root);
   function drill(subtree) {
     const siblings = map
-      ? getFromMap(subtree[settings.siblingsAccessor], map)
-      : subtree[settings.siblingsAccessor];
+      ? getFromMap(subtree[settings.nextBeforeAccessor], map)
+      : subtree[settings.nextBeforeAccessor];
     siblings?.forEach((sibling) => {
       compare(sibling);
       nodes.push(sibling);
@@ -42,8 +44,8 @@ export const getElements = <T>(
     });
 
     const partners = map
-      ? getFromMap(subtree[settings.partnersAccessor], map)
-      : subtree[settings.partnersAccessor];
+      ? getFromMap(subtree[settings.nextAfterAccessor], map)
+      : subtree[settings.nextAfterAccessor];
     partners?.forEach((spouse) => {
       compare(spouse);
       nodes.push(spouse);
@@ -51,8 +53,8 @@ export const getElements = <T>(
     });
 
     const children = map
-      ? getFromMap(subtree[settings.childrenAccessor], map)
-      : subtree[settings.childrenAccessor];
+      ? getFromMap(subtree[settings.targetsAccessor], map)
+      : subtree[settings.targetsAccessor];
     children?.forEach((child) => {
       compare(child);
       nodes.push(child);
@@ -61,8 +63,8 @@ export const getElements = <T>(
     });
 
     const parents = map
-      ? getFromMap(subtree[settings.parentsAccessor], map)
-      : subtree[settings.parentsAccessor];
+      ? getFromMap(subtree[settings.sourcesAccessor], map)
+      : subtree[settings.sourcesAccessor];
     parents?.forEach((parent) => {
       compare(parent);
       nodes.push(parent);

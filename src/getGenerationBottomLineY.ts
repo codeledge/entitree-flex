@@ -1,17 +1,18 @@
 import { Settings } from "./Settings";
+import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
 
 export function getGenerationBottomLineY<T>(
   subtree: TreeNode<T>,
   settings: Settings,
-  map?: Record<string, T>
+  map?: TreeMap<T>
 ) {
   let bottomLineY = subtree.y + subtree.height + subtree.marginBottom;
 
   const siblings = map
-    ? getFromMap(subtree[settings.siblingsAccessor], map)
-    : subtree[settings.siblingsAccessor];
+    ? getFromMap(subtree[settings.nextBeforeAccessor], map)
+    : subtree[settings.nextBeforeAccessor];
 
   siblings?.forEach((sibling) => {
     bottomLineY = Math.max(
@@ -21,8 +22,8 @@ export function getGenerationBottomLineY<T>(
   });
 
   const partners = map
-    ? getFromMap(subtree[settings.partnersAccessor], map)
-    : subtree[settings.partnersAccessor];
+    ? getFromMap(subtree[settings.nextAfterAccessor], map)
+    : subtree[settings.nextAfterAccessor];
 
   partners?.forEach((partner) => {
     bottomLineY = Math.max(

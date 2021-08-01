@@ -1,18 +1,16 @@
 export type Settings = {
-  childAccessor: string;
-  childrenAccessor: string;
-  cousinSpacing: number;
+  clone: boolean;
+  differentGroupSpacing: number;
+  enableFlex: boolean;
   nodeHeight: number;
   nodeWidth: number;
-  enableFlex: boolean;
-  parentAccessor: string;
-  parentsAccessor: string;
-  partnersAccessor: string;
+  sourcesAccessor: string;
+  nextAfterAccessor: string;
   rootX: number;
   rootY: number;
-  siblingsAccessor: string;
-  siblingSpacing: number;
-  spouseSpacing: number;
-  verticalSpacing: number;
-  clone: boolean;
+  nextBeforeAccessor: string;
+  nextBeforeSpacing: number;
+  nextAfterSpacing: number;
+  targetsAccessor: string;
+  sourceTargetSpacing: number;
 };

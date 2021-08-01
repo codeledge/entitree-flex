@@ -1,47 +1,44 @@
-const layout = require("../src/index.ts").default;
+const { layoutFromNested, layoutFromMap } = require("../src/index.ts");
 const niceTree = require("./niceTree.ts").default;
+const debugTree = require("./debugTree.ts").default;
+const flatTree = require("./flatTree.ts").default;
 const { randomTree } = require("../fixtures/randomTree");
 
 var draw = SVG().addTo("body");
 
-//const tree = niceTree;
-const tree = randomTree();
-
-layout(tree, {
+let tree = layoutFromNested(debugTree, {
   rootX: window.innerWidth / 2,
   rootY: window.innerHeight / 2,
-  verticalSpacing: 20,
+  sourceTargetSpacing: 20,
 });
 
-console.log(tree);
+// const { nodes, rels } = layoutFromMap("1", flatTree, {
+//   rootX: window.innerWidth / 2,
+//   rootY: window.innerHeight / 2,
+//   sourceTargetSpacing: 20,
+//   targetsAccessor: "childrenIds",
+//   nextAfterAccessor: "spousesIds",
+// });
+// rels.forEach((rel) => {
+//   draw.path(getPathD(rel.source, rel.target));
+// });
+// nodes.forEach((node) => {
+//   drawNode(node);
+// });
 
-drawPaths(tree);
-drawNodes(tree);
-
-function drawPaths(subtree) {
-  function getPathD(sourceNode, targetNode) {
-    return `M${sourceNode.x + sourceNode.width / 2} ${
-      sourceNode.y + sourceNode.height
-    } L${targetNode.x + targetNode.width / 2} ${targetNode.y}`;
-  }
-  function getSameD(sourceNode, targetNode) {
-    const left = sourceNode.x < targetNode.x ? sourceNode : targetNode;
-    const right = sourceNode.x < targetNode.x ? targetNode : sourceNode;
-    return `M${left.x + left.width} ${left.y + left.height / 2} L${right.x} ${
-      right.y + right.height / 2
-    }`;
-  }
+drawPathsRecursive(tree);
+function drawPathsRecursive(subtree) {
   drill(subtree);
   function drill(subtree) {
     if (subtree.siblings) {
       subtree.siblings.forEach((target, index) => {
-        draw.path(getSameD(subtree, target));
+        draw.path(getPathD(subtree, target));
       });
     }
 
     if (subtree.partners) {
       subtree.partners.forEach((target, index) => {
-        draw.path(getSameD(subtree, target));
+        draw.path(getPathD(subtree, target));
       });
     }
 
@@ -61,27 +58,8 @@ function drawPaths(subtree) {
   }
 }
 
-function drawNode(node) {
-  draw
-    .rect(
-      node.width + (node.marginRight || 0),
-      node.height + (node.marginBottom || 0)
-    )
-    .move(node.x, node.y)
-    .radius(3)
-    .opacity(0.1)
-    .fill(stringToColour(node.name));
-
-  draw
-    .rect(node.width, node.height)
-    .radius(3)
-    .move(node.x, node.y)
-    .fill(stringToColour(node.name));
-
-  //draw.text(node.name).move(node.x, node.y);
-}
-
-function drawNodes(subtree) {
+drawNodesRecursive(tree);
+function drawNodesRecursive(subtree) {
   drill(subtree);
   function drill(subtree) {
     drawNode(subtree);
@@ -112,6 +90,26 @@ function drawNodes(subtree) {
   }
 }
 
+function drawNode(node) {
+  draw
+    .rect(
+      node.width + (node.marginRight || 0),
+      node.height + (node.marginBottom || 0)
+    )
+    .move(node.x, node.y)
+    .radius(3)
+    .opacity(0.1)
+    .fill(stringToColour(node.name || ""));
+
+  draw
+    .rect(node.width, node.height)
+    .radius(3)
+    .move(node.x, node.y)
+    .fill(stringToColour(node.name));
+
+  draw.text(node.name).move(node.x, node.y);
+}
+
 function stringToColour(str) {
   var hash = 0;
   for (var i = 0; i < str.length; i++) {
@@ -123,4 +121,12 @@ function stringToColour(str) {
     colour += ("00" + value.toString(16)).substr(-2);
   }
   return colour;
+}
+
+function getPathD(sourceNode, targetNode) {
+  return `M${sourceNode.x + sourceNode.width / 2} ${
+    sourceNode.y + sourceNode.height / 2
+  } L${targetNode.x + targetNode.width / 2} ${
+    targetNode.y + targetNode.height / 2
+  }`;
 }

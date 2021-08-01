@@ -1,4 +1,5 @@
-import { TreeNode } from "../src";
+import { TestNode } from "./TestNode";
+import { defaultSettings } from "./../src/defaultSettings";
 import { normalizeTree } from "../src/normalizeTree";
 
 test("1 target same size", () => {
@@ -15,8 +16,8 @@ test("1 target same size", () => {
       },
       { x: 110, width: 10, marginRight: 10 },
     ],
-  } as TreeNode;
-  const shift = normalizeTree(root, "children");
+  } as TestNode;
+  const shift = normalizeTree(root, "children", defaultSettings);
 
   expect(root.children[0].x).toBe(-5);
 });
