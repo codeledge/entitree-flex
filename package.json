@@ -15,6 +15,10 @@
     "/dist"
   ],
   "author": "Orlando Groppo <orlando.groppo@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeledge/entitree-flex"
+  },
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
