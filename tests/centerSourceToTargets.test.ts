@@ -1,9 +1,8 @@
-import { TreeNode, defaultSettings } from "../src";
-
 import { TestNode } from "./TestNode";
 import { centerSourceToTargets } from "../src/centerSourceToTargets";
+import { defaultSettings } from "../src";
 
-test("adds sizes", () => {
+test("centerSourceToTargets", () => {
   const source = { width: 3, x: 0 } as TestNode;
   const targets = [
     { x: 0, width: 5, height: 1 },

@@ -16,7 +16,7 @@ export const addGenerationSizes = <T>(
     siblings?.forEach((sibling) => {
       sibling.width = sibling.width || settings.nodeWidth;
       sibling.height = sibling.height || settings.nodeHeight;
-      sibling.marginRight = settings.nextBeforeSpacing; //todo: check
+      sibling.marginRight = settings.nextBeforeSpacing;
       sibling.marginBottom = settings.sourceTargetSpacing;
     });
 
@@ -26,18 +26,25 @@ export const addGenerationSizes = <T>(
     partners?.forEach((partner, partnerIndex) => {
       partner.width = partner.width || settings.nodeWidth;
       partner.height = partner.height || settings.nodeHeight;
-      if (partnerIndex === partners.length - 1)
-        partner.marginRight = settings.differentGroupSpacing;
-      else partner.marginRight = settings.nextBeforeSpacing;
+      if (partnerIndex === partners.length - 1) {
+        //secondDegreeSpacing because you want more space between the last spouse and the next child, so the don't get confused as both children
+        partner.marginRight = settings.secondDegreeSpacing;
+      } else partner.marginRight = settings.nextAfterSpacing;
       partner.marginBottom = settings.sourceTargetSpacing;
     });
 
     node.width = node.width || settings.nodeWidth;
     node.height = node.height || settings.nodeHeight;
 
-    if (index === nodes.length - 1 && (!partners || !partners.length))
-      node.marginRight = settings.differentGroupSpacing;
-    else node.marginRight = settings.nextBeforeSpacing;
+    if (partners && partners.length) {
+      node.marginRight = settings.nextAfterSpacing; //for sure there is an after node
+    } else {
+      if (index === nodes.length - 1) {
+        node.marginRight = settings.secondDegreeSpacing; // there is a cousin next
+      } else {
+        node.marginRight = settings.firstDegreeSpacing; //there is sibling next
+      }
+    }
 
     node.marginBottom = settings.sourceTargetSpacing;
   });

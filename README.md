@@ -127,20 +127,21 @@ layoutFromMap(1, flatTree [, settings])
 
 ```
 defaultSettings = {
-  targetsAccessor: "children", // what prop to use to pick children
-  differentGroupSpacing: 20, // spacing in px between "cousins"
+  clone: false, // returns a copy of the input, if your application does not allow editing the original object
+  firstDegreeSpacing: 15, // spacing in px between nodes belonging to the same source, eg children with same parent
+  secondDegreeSpacing: 20, // spacing in px between nodes not belonging to same parent eg "cousin" nodes
+  enableFlex: true, // has slightly better perfomance if turned off (node.width, node.height will not be read)
+  nextAfterAccessor: "partners", // the side node prop used to go sideways, AFTER the current node
+  nextAfterSpacing: 10, // the spacing of the "side" nodes AFTER the current node
+  nextBeforeAccessor: "siblings", // the side node prop used to go sideways, BEFORE the current node
+  nextBeforeSpacing: 10, // the spacing of the "side" nodes BEFORE the current node
   nodeHeight: 40, // default node height in px
   nodeWidth: 40, // default node width in px
-  enableFlex: true, // has slightly better perfomance if turned off (node.width, node.height will not be read)
+  rootX: 0, // set root position if other than 0
+  rootY: 0, // set root position if other than 0
   sourcesAccessor: "parents", // the prop used to go up the ancestors
-  nextAfterAccessor: "partners", // the side node prop used to go sideways, AFTER the current node
-  rootX: 0, // default root position
-  rootY: 0, // default root position
-  nextBeforeAccessor: "siblings", // the side node prop used to go sideways, BEFORE the current node
-  nextBeforeSpacing: 10,
-  nextAfterSpacing: 10,
-  sourceTargetSpacing: 10,
-  clone: false, // returns a clone, if your application does not allow editing the original object
+  sourceTargetSpacing: 10, // the "vertical" spacing in vertical layout
+  targetsAccessor: "children", // what prop to use to pick up children
 };
 ```
 

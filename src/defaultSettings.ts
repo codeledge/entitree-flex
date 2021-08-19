@@ -1,18 +1,19 @@
 import { Settings } from "./Settings";
 
 export const defaultSettings: Settings = {
-  targetsAccessor: "children",
-  differentGroupSpacing: 20,
-  nodeHeight: 40,
-  nodeWidth: 40,
+  clone: false,
   enableFlex: true,
-  sourcesAccessor: "parents",
+  firstDegreeSpacing: 15,
   nextAfterAccessor: "partners",
-  rootX: 0,
-  rootY: 0,
+  nextAfterSpacing: 10,
   nextBeforeAccessor: "siblings",
   nextBeforeSpacing: 10,
-  nextAfterSpacing: 10,
+  nodeHeight: 40,
+  nodeWidth: 40,
+  rootX: 0,
+  rootY: 0,
+  secondDegreeSpacing: 20,
+  sourcesAccessor: "parents",
   sourceTargetSpacing: 10,
-  clone: false,
+  targetsAccessor: "children",
 };

@@ -1,16 +1,17 @@
 export type Settings = {
   clone: boolean;
-  differentGroupSpacing: number;
+  firstDegreeSpacing: number;
+  secondDegreeSpacing: number;
   enableFlex: boolean;
-  nodeHeight: number;
-  nodeWidth: number;
-  sourcesAccessor: string;
   nextAfterAccessor: string;
-  rootX: number;
-  rootY: number;
+  nextAfterSpacing: number;
   nextBeforeAccessor: string;
   nextBeforeSpacing: number;
-  nextAfterSpacing: number;
-  targetsAccessor: string;
+  nodeHeight: number;
+  nodeWidth: number;
+  rootX: number;
+  rootY: number;
+  sourcesAccessor: string;
   sourceTargetSpacing: number;
+  targetsAccessor: string;
 };
