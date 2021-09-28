@@ -32,35 +32,32 @@ export const getElements = <T>(
     maxTop = Math.min(maxTop, node.y);
   }
 
-  drill(root);
-  function drill(subtree) {
-    const siblings = map
+  function processNextBefores(subtree) {
+    const nextBefores = map
       ? getFromMap(subtree[settings.nextBeforeAccessor], map)
       : subtree[settings.nextBeforeAccessor];
-    siblings?.forEach((sibling) => {
+    nextBefores?.forEach((sibling) => {
       compare(sibling);
       nodes.push(sibling);
       rels.push({ source: subtree, target: sibling });
     });
+  }
 
-    const partners = map
+  function processNextAfters(subtree) {
+    const nextAfters = map
       ? getFromMap(subtree[settings.nextAfterAccessor], map)
       : subtree[settings.nextAfterAccessor];
-    partners?.forEach((spouse) => {
+    nextAfters?.forEach((spouse) => {
       compare(spouse);
       nodes.push(spouse);
       rels.push({ source: subtree, target: spouse });
     });
+  }
 
-    const children = map
-      ? getFromMap(subtree[settings.targetsAccessor], map)
-      : subtree[settings.targetsAccessor];
-    children?.forEach((child) => {
-      compare(child);
-      nodes.push(child);
-      rels.push({ source: subtree, target: child });
-      drill(child);
-    });
+  drillParents(root);
+  function drillParents(subtree) {
+    processNextBefores(subtree);
+    processNextAfters(subtree);
 
     const parents = map
       ? getFromMap(subtree[settings.sourcesAccessor], map)
@@ -69,7 +66,23 @@ export const getElements = <T>(
       compare(parent);
       nodes.push(parent);
       rels.push({ source: subtree, target: parent });
-      drill(parent);
+      drillParents(parent);
+    });
+  }
+
+  drillChildren(root);
+  function drillChildren(subtree) {
+    processNextBefores(subtree);
+    processNextAfters(subtree);
+
+    const children = map
+      ? getFromMap(subtree[settings.targetsAccessor], map)
+      : subtree[settings.targetsAccessor];
+    children?.forEach((child) => {
+      compare(child);
+      nodes.push(child);
+      rels.push({ source: subtree, target: child });
+      drillChildren(child);
     });
   }
 
