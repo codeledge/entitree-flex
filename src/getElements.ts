@@ -54,36 +54,34 @@ export const getElements = <T>(
     });
   }
 
-  drillParents(root);
-  function drillParents(subtree) {
+  drill(root);
+  function drill(subtree, direction?: "parents" | "children") {
     processNextBefores(subtree);
     processNextAfters(subtree);
 
-    const parents = map
-      ? getFromMap(subtree[settings.sourcesAccessor], map)
-      : subtree[settings.sourcesAccessor];
-    parents?.forEach((parent) => {
-      compare(parent);
-      nodes.push(parent);
-      rels.push({ source: subtree, target: parent });
-      drillParents(parent);
-    });
-  }
+    if (!direction || direction === "parents") {
+      const parents = map
+        ? getFromMap(subtree[settings.sourcesAccessor], map)
+        : subtree[settings.sourcesAccessor];
+      parents?.forEach((parent) => {
+        compare(parent);
+        nodes.push(parent);
+        rels.push({ source: subtree, target: parent });
+        drill(parent, "parents");
+      });
+    }
 
-  drillChildren(root);
-  function drillChildren(subtree) {
-    processNextBefores(subtree);
-    processNextAfters(subtree);
-
-    const children = map
-      ? getFromMap(subtree[settings.targetsAccessor], map)
-      : subtree[settings.targetsAccessor];
-    children?.forEach((child) => {
-      compare(child);
-      nodes.push(child);
-      rels.push({ source: subtree, target: child });
-      drillChildren(child);
-    });
+    if (!direction || direction === "children") {
+      const children = map
+        ? getFromMap(subtree[settings.targetsAccessor], map)
+        : subtree[settings.targetsAccessor];
+      children?.forEach((child) => {
+        compare(child);
+        nodes.push(child);
+        rels.push({ source: subtree, target: child });
+        drill(child, "children");
+      });
+    }
   }
 
   return {
