@@ -6,22 +6,19 @@ import { getFromMap } from "./getFromMap";
 export function getGenerationTopLineY<T>(
   subtree: TreeNode<T>,
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ) {
   let topLineY = subtree.y;
 
-  const siblings = map
-    ? getFromMap(subtree[settings.nextBeforeAccessor], map)
-    : subtree[settings.nextBeforeAccessor];
+  const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
   siblings?.forEach((sibling) => {
     topLineY = Math.min(topLineY, sibling.y);
   });
 
-  const partners = map
-    ? getFromMap(subtree[settings.nextAfterAccessor], map)
-    : subtree[settings.nextAfterAccessor];
+  const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
   partners?.forEach((partner) => {
     topLineY = Math.min(topLineY, partner.y);
   });
+
   return topLineY;
 }

@@ -14,17 +14,13 @@ export const getInitialTargetsShiftLeft = <T>(
   source: TreeNode<T>,
   targets: TreeNode<T>[],
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ) => {
   return (
     targets.reduce((totalWidth, target, index) => {
-      const siblings = map
-        ? getFromMap(target[settings.nextBeforeAccessor], map)
-        : target[settings.nextBeforeAccessor];
+      const siblings = getFromMap(target[settings.nextBeforeAccessor], map);
 
-      const partners = map
-        ? getFromMap(target[settings.nextAfterAccessor], map)
-        : target[settings.nextAfterAccessor];
+      const partners = getFromMap(target[settings.nextAfterAccessor], map);
 
       //for the first child, we don't care about the padding (siblings) left
       if (index !== 0) {

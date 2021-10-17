@@ -6,12 +6,10 @@ import { getFromMap } from "./getFromMap";
 export const addGenerationSizes = <T>(
   nodes: TreeNode<T>[],
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ): void => {
   nodes.forEach((node, index) => {
-    const siblings = map
-      ? getFromMap(node[settings.nextBeforeAccessor], map)
-      : node[settings.nextBeforeAccessor];
+    const siblings = getFromMap(node[settings.nextBeforeAccessor], map);
 
     siblings?.forEach((sibling) => {
       sibling.width = sibling.width || settings.nodeWidth;
@@ -20,9 +18,7 @@ export const addGenerationSizes = <T>(
       sibling.marginBottom = settings.sourceTargetSpacing;
     });
 
-    const partners = map
-      ? getFromMap(node[settings.nextAfterAccessor], map)
-      : node[settings.nextAfterAccessor];
+    const partners = getFromMap(node[settings.nextAfterAccessor], map);
     partners?.forEach((partner, partnerIndex) => {
       partner.width = partner.width || settings.nodeWidth;
       partner.height = partner.height || settings.nodeHeight;

@@ -4,7 +4,7 @@ export const defaultSettings: Settings = {
   clone: false,
   enableFlex: true,
   firstDegreeSpacing: 15,
-  nextAfterAccessor: "partners",
+  nextAfterAccessor: "spouses",
   nextAfterSpacing: 10,
   nextBeforeAccessor: "siblings",
   nextBeforeSpacing: 10,
@@ -16,4 +16,5 @@ export const defaultSettings: Settings = {
   sourcesAccessor: "parents",
   sourceTargetSpacing: 10,
   targetsAccessor: "children",
+  orientation: "vertical",
 };

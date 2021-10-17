@@ -15,7 +15,7 @@ import { makeRoot } from "./makeRoot";
 import { normalizeTree } from "./normalizeTree";
 
 export function layoutFromMap<T>(
-  rootId: string,
+  rootId: string | number,
   originalMap: Record<string, T>,
   customSettings: Partial<Settings> = {}
 ) {
@@ -69,7 +69,6 @@ export function layoutFromMap<T>(
     const children = getFromMap(subtree[settings.targetsAccessor], map);
     if (!children || !children.length) return;
 
-    //rename to addGenerationSizes
     addGenerationSizes<T>(children, settings, map);
 
     const initialShiftLeft = getInitialTargetsShiftLeft<T>(

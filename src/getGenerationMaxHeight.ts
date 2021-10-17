@@ -6,21 +6,18 @@ import { getFromMap } from "./getFromMap";
 export function getGenerationMaxHeight<T>(
   subtree: TreeNode<T>,
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ) {
   let maxHeight = subtree.height;
 
-  const siblings = map
-    ? getFromMap(subtree[settings.nextBeforeAccessor], map)
-    : subtree[settings.nextBeforeAccessor];
+  const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
 
   siblings?.forEach((sibling) => {
     maxHeight = Math.max(maxHeight, sibling.height);
   });
 
-  const partners = map
-    ? getFromMap(subtree[settings.nextAfterAccessor], map)
-    : subtree[settings.nextAfterAccessor];
+  const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
+
   partners?.forEach((partner) => {
     maxHeight = Math.max(maxHeight, partner.height);
   });

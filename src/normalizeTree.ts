@@ -8,28 +8,25 @@ export const normalizeTree = <T>(
   root: TreeNode<T>,
   accessor: string,
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ) => {
-  const targets: TreeNode<T>[] = map
-    ? getFromMap(root[accessor], map)
-    : root[accessor];
+  const targets: TreeNode<T>[] = getFromMap(root[accessor], map);
   if (!targets || !targets.length) return;
   const rootCenter = root.x + root.width / 2;
 
-  const firstTargetSiblings = map
-    ? getFromMap(targets[0][settings.nextBeforeAccessor], map)
-    : targets[0][settings.nextBeforeAccessor];
+  const firstTargetSiblings = getFromMap(
+    targets[0][settings.nextBeforeAccessor],
+    map
+  );
 
-  const leftMostNode = firstTargetSiblings?.[0]
-    ? firstTargetSiblings?.[0]
-    : targets[0];
+  const leftMostNode = firstTargetSiblings?.[0] || targets[0];
 
   const lastTarget = last(targets);
-  const lastTargetPartner = map
-    ? last(getFromMap(lastTarget[settings.nextAfterAccessor], map))
-    : last(lastTarget[settings.nextAfterAccessor]);
+  const lastTargetPartner = last(
+    getFromMap(lastTarget[settings.nextAfterAccessor], map)
+  );
 
-  const rightMostNode = lastTargetPartner ? lastTargetPartner : lastTarget;
+  const rightMostNode = lastTargetPartner || lastTarget;
 
   const centerPoint =
     (leftMostNode.x + rightMostNode.x + rightMostNode.width) / 2;
@@ -42,22 +39,19 @@ export const normalizeTree = <T>(
   function drillTargets(subtree) {
     subtree.x -= shift;
 
-    const siblings = map
-      ? getFromMap(subtree[settings.nextBeforeAccessor], map)
-      : subtree[settings.nextBeforeAccessor];
+    const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
 
     siblings?.forEach((sibling) => {
       sibling.x -= shift;
     });
 
-    const partners = map
-      ? getFromMap(subtree[settings.nextAfterAccessor], map)
-      : subtree[settings.nextAfterAccessor];
+    const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
+
     partners?.forEach((partner) => {
       partner.x -= shift;
     });
 
-    const next = map ? getFromMap(subtree[accessor], map) : subtree[accessor];
+    const next = getFromMap(subtree[accessor], map);
     next?.forEach((node) => {
       drillTargets(node);
     });

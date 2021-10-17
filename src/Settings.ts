@@ -14,4 +14,5 @@ export type Settings = {
   sourcesAccessor: string;
   sourceTargetSpacing: number;
   targetsAccessor: string;
+  orientation: "vertical" | "horizontal";
 };
