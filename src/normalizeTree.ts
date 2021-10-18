@@ -4,56 +4,85 @@ import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
 import { last } from "./last";
 
-export const normalizeTree = <T>(
-  root: TreeNode<T>,
+export const normalizeTree = (
+  root: TreeNode,
   accessor: string,
   settings: Settings,
-  map: TreeMap<T>
+  map: TreeMap
 ) => {
-  const targets: TreeNode<T>[] = getFromMap(root[accessor], map);
+  const targets = getFromMap(root[accessor], map);
   if (!targets || !targets.length) return;
-  const rootCenter = root.x + root.width / 2;
 
   const firstTargetSiblings = getFromMap(
     targets[0][settings.nextBeforeAccessor],
     map
   );
 
-  const leftMostNode = firstTargetSiblings?.[0] || targets[0];
+  const firstMostNode = firstTargetSiblings?.[0] || targets[0];
 
   const lastTarget = last(targets);
   const lastTargetPartner = last(
     getFromMap(lastTarget[settings.nextAfterAccessor], map)
   );
 
-  const rightMostNode = lastTargetPartner || lastTarget;
+  const lastMostNode = lastTargetPartner || lastTarget;
 
-  const centerPoint =
-    (leftMostNode.x + rightMostNode.x + rightMostNode.width) / 2;
-  const shift = centerPoint - rootCenter;
+  let shift;
+  if (settings.orientation === "vertical") {
+    const centerPointX =
+      (firstMostNode.x + lastMostNode.x + lastMostNode.width) / 2;
 
-  targets.forEach((node) => {
-    drillTargets(node);
-  });
+    const rootCenterX = root.x + root.width / 2;
+    shift = centerPointX - rootCenterX;
 
-  function drillTargets(subtree) {
+    targets.forEach((node) => {
+      normalizeTargetsX(node);
+    });
+  } else {
+    const centerPointY =
+      (firstMostNode.y + lastMostNode.y + lastMostNode.height) / 2;
+
+    const rootCenterY = root.y + root.height / 2;
+    shift = centerPointY - rootCenterY;
+
+    targets.forEach((node) => {
+      normalizeTargetsY(node);
+    });
+  }
+
+  function normalizeTargetsX(subtree) {
     subtree.x -= shift;
 
-    const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
+    getFromMap(subtree[settings.nextBeforeAccessor], map)?.forEach(
+      (sibling) => {
+        sibling.x -= shift;
+      }
+    );
 
-    siblings?.forEach((sibling) => {
-      sibling.x -= shift;
-    });
-
-    const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
-
-    partners?.forEach((partner) => {
+    getFromMap(subtree[settings.nextAfterAccessor], map)?.forEach((partner) => {
       partner.x -= shift;
     });
 
-    const next = getFromMap(subtree[accessor], map);
-    next?.forEach((node) => {
-      drillTargets(node);
+    getFromMap(subtree[accessor], map)?.forEach((node) => {
+      normalizeTargetsX(node);
+    });
+  }
+
+  function normalizeTargetsY(subtree) {
+    subtree.y -= shift;
+
+    getFromMap(subtree[settings.nextBeforeAccessor], map)?.forEach(
+      (sibling) => {
+        sibling.y -= shift;
+      }
+    );
+
+    getFromMap(subtree[settings.nextAfterAccessor], map)?.forEach((partner) => {
+      partner.y -= shift;
+    });
+
+    getFromMap(subtree[accessor], map)?.forEach((node) => {
+      normalizeTargetsY(node);
     });
   }
 };

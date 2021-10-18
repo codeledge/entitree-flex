@@ -2,23 +2,28 @@ import { Settings } from "./Settings";
 import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
+import { getNodeBottomY } from "./getNodeBottomY";
 
-export function getGenerationTopLineY<T>(
-  subtree: TreeNode<T>,
+export function addGroupBottomY(
+  subtree: TreeNode,
   settings: Settings,
-  map: TreeMap<T>
+  map: TreeMap
 ) {
-  let topLineY = subtree.y;
+  subtree.groupBottomY = getNodeBottomY(subtree);
 
   const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
   siblings?.forEach((sibling) => {
-    topLineY = Math.min(topLineY, sibling.y);
+    subtree.groupBottomY = Math.max(
+      subtree.groupBottomY,
+      getNodeBottomY(sibling)
+    );
   });
 
   const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
   partners?.forEach((partner) => {
-    topLineY = Math.min(topLineY, partner.y);
+    subtree.groupBottomY = Math.max(
+      subtree.groupBottomY,
+      getNodeBottomY(partner)
+    );
   });
-
-  return topLineY;
 }

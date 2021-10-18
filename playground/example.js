@@ -11,6 +11,8 @@ const { nodes, rels } = layoutFromMap("1", flatTree, {
   orientation: "horizontal",
 });
 
+//console.log(nodes);
+
 rels.forEach((rel) => {
   draw.path(getPathD(rel.source, rel.target));
 });

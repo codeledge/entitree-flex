@@ -1,18 +1,24 @@
+import { getNodeBottomY } from "./getNodeBottomY";
+import { getNodeRightX } from "./getNodeRightX";
+import { getInitialTargetsShiftTop } from "./getInitialTargetsShiftTop";
 import { Settings } from "./Settings";
 import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
-import { addGenerationSizes } from "./addGenerationSizes";
+import { addLevelNodesSizes } from "./addLevelNodesSizes";
 import { centerSourceToTargets } from "./centerSourceToTargets";
 import { checkContourOverlap } from "./checkContourOverlap";
 import { defaultSettings } from "./defaultSettings";
 import { getElements } from "./getElements";
 import { getFromMap } from "./getFromMap";
-import { getGenerationBottomLineY } from "./getGenerationBottomLineY";
-import { getGenerationMaxHeight } from "./getGenerationMaxHeight";
-import { getGenerationTopLineY } from "./getGenerationTopLineY";
 import { getInitialTargetsShiftLeft } from "./getInitialTargetsShiftLeft";
 import { makeRoot } from "./makeRoot";
 import { normalizeTree } from "./normalizeTree";
+import { addRootSiblingsPositions } from "./addRootSiblingsPositions";
+import { addRootSpousesPositions } from "./addRootSpousesPositions";
+import { addGroupBottomY } from "./addGroupBottomY";
+import { addGroupRightX } from "./addGroupRightX";
+import { addGroupTopY } from "./addGroupTopY";
+import { addGroupLeftX } from "./addGroupLeftX";
 
 export function layoutFromMap<T>(
   rootId: string | number,
@@ -28,160 +34,241 @@ export function layoutFromMap<T>(
     ? JSON.parse(JSON.stringify(originalMap))
     : originalMap;
 
-  const root = makeRoot<T>(map[rootId], settings);
+  const root = makeRoot(map[rootId], settings);
 
-  addGenerationSizes<T>([root], settings, map);
-  root.topLineY = root.y;
-  root.bottomLineY = root.y + root.height + root.marginBottom;
+  addLevelNodesSizes([root], settings, map);
 
-  if (root[settings.nextBeforeAccessor])
-    getFromMap(root[settings.nextBeforeAccessor], map)
-      .reverse()
-      .forEach((sibling, siblingIndex, rootSiblings) => {
-        const nextNode = rootSiblings[siblingIndex - 1] || root;
-        sibling.x = nextNode.x - sibling.width - sibling.marginRight;
-        //align vertically
-        sibling.y = root.y + root.height / 2 - sibling.height / 2;
-        const outerBottomY = sibling.y + sibling.height + sibling.marginBottom;
+  addRootSiblingsPositions(root, settings, map);
+  addRootSpousesPositions(root, settings, map);
 
-        if (sibling.y < root.topLineY) root.topLineY = sibling.y;
-        if (outerBottomY > root.bottomLineY) root.bottomLineY = outerBottomY;
-      });
-
-  if (root[settings.nextAfterAccessor])
-    getFromMap(root[settings.nextAfterAccessor], map).forEach(
-      (partner, partnerIndex, rootPartners) => {
-        const previousPartner = rootPartners[partnerIndex - 1] || root;
-        partner.x =
-          previousPartner.x +
-          previousPartner.width +
-          previousPartner.marginRight;
-        partner.y = root.y + root.height / 2 - partner.height / 2;
-        const outerBottomY = partner.y + partner.height + partner.marginBottom;
-        if (partner.y < root.topLineY) root.topLineY = partner.y;
-        if (outerBottomY > root.bottomLineY) root.bottomLineY = outerBottomY;
-      }
-    );
+  addGroupBottomY(root, settings, map);
+  addGroupRightX(root, settings, map);
+  addGroupLeftX(root, settings, map);
+  addGroupTopY(root, settings, map);
 
   const descendantsContour = [];
   drillChildren(root);
   function drillChildren(subtree: TreeNode<T>) {
     const children = getFromMap(subtree[settings.targetsAccessor], map);
-    if (!children || !children.length) return;
+    if (!children?.length) return;
 
-    addGenerationSizes<T>(children, settings, map);
+    addLevelNodesSizes(children, settings, map);
 
-    const initialShiftLeft = getInitialTargetsShiftLeft<T>(
-      subtree,
-      children,
-      settings,
-      map
-    );
-    let currentX = subtree.x - initialShiftLeft;
+    if (settings.orientation === "vertical") {
+      const initialShiftLeft = getInitialTargetsShiftLeft<T>(
+        subtree,
+        children,
+        settings,
+        map
+      );
+      let currentX = subtree.x - initialShiftLeft;
 
-    const topLineY = getGenerationBottomLineY<T>(subtree, settings, map);
+      children.forEach((child) => {
+        const midVerticalY = subtree.groupBottomY + child.groupMaxHeight / 2;
 
-    children.forEach((child) => {
-      const maxHeight = getGenerationMaxHeight<T>(child, settings, map);
-      const midVerticalY = topLineY + maxHeight / 2;
-      /////////////////// SIBLING
-      const siblings = getFromMap(child[settings.nextBeforeAccessor], map);
-      siblings?.forEach((sibling) => {
-        sibling.x = currentX;
-        sibling.y = midVerticalY - sibling.height / 2;
+        /////////////////// BEFORES ///////////////////
+        const siblings = getFromMap(child[settings.nextBeforeAccessor], map);
+        siblings?.forEach((sibling) => {
+          sibling.x = currentX;
+          sibling.y = midVerticalY - sibling.height / 2;
 
-        checkContourOverlap<T>(descendantsContour, sibling);
+          checkContourOverlap(descendantsContour, sibling, settings);
 
-        currentX = sibling.x + sibling.width + sibling.marginRight;
+          currentX = getNodeRightX(sibling);
+        });
+
+        /////////////////// GROUP MAIN NODE
+
+        //Set positions
+        child.x = currentX;
+        child.y = midVerticalY - child.height / 2;
+
+        checkContourOverlap(descendantsContour, child, settings);
+        currentX = getNodeRightX(child);
+
+        /////////////////// AFTERS ///////////////////
+        getFromMap(child[settings.nextAfterAccessor], map)?.forEach(
+          (partner) => {
+            partner.x = currentX;
+            partner.y = midVerticalY - partner.height / 2;
+
+            checkContourOverlap(descendantsContour, partner, settings);
+            currentX = getNodeRightX(partner);
+          }
+        );
+
+        addGroupBottomY(child, settings, map);
+
+        drillChildren(child);
       });
+    } else {
+      const initialShiftTop = getInitialTargetsShiftTop<T>(
+        subtree,
+        children,
+        settings,
+        map
+      );
+      let currentY = subtree.y - initialShiftTop;
 
-      /////////////////// CHILD
+      children.forEach((child) => {
+        const midPointX = subtree.groupRightX + child.groupMaxWidth / 2;
 
-      //Set positions
-      child.x = currentX;
-      child.y = midVerticalY - child.height / 2;
+        /////////////////// SIBLING
+        const siblings = getFromMap(child[settings.nextBeforeAccessor], map);
+        siblings?.forEach((sibling) => {
+          sibling.y = currentY;
+          sibling.x = midPointX - sibling.width / 2;
 
-      checkContourOverlap<T>(descendantsContour, child);
-      currentX = child.x + child.width + child.marginRight;
+          checkContourOverlap(descendantsContour, sibling, settings);
 
-      /////////////////// partners
-      const partners = getFromMap(child[settings.nextAfterAccessor], map);
-      partners?.forEach((partner) => {
-        partner.x = currentX;
-        partner.y = midVerticalY - partner.height / 2;
+          currentY = getNodeBottomY(sibling);
+        });
 
-        checkContourOverlap<T>(descendantsContour, partner);
-        currentX = partner.x + partner.width + partner.marginRight;
+        /////////////////// CHILD
+
+        //Set positions
+        child.y = currentY;
+        child.x = midPointX - child.width / 2;
+
+        checkContourOverlap(descendantsContour, child, settings);
+        currentY = getNodeBottomY(child);
+
+        /////////////////// partners
+        const partners = getFromMap(child[settings.nextAfterAccessor], map);
+        partners?.forEach((partner) => {
+          partner.y = currentY;
+          partner.x = midPointX - partner.width / 2;
+
+          checkContourOverlap(descendantsContour, partner, settings);
+          currentY = getNodeBottomY(partner);
+        });
+
+        addGroupRightX(child, settings, map);
+
+        drillChildren(child);
       });
+    }
 
-      drillChildren(child);
-    });
-
-    centerSourceToTargets<T>(subtree, children, settings, map);
+    centerSourceToTargets(subtree, children, settings, map);
   }
-  normalizeTree<T>(root, settings.targetsAccessor, settings, map);
+  normalizeTree(root, settings.targetsAccessor, settings, map);
 
   const parentsContour = [];
   drillParents(root);
   function drillParents(subtree: TreeNode<T>) {
     const parents = getFromMap(subtree[settings.sourcesAccessor], map);
-
     if (!parents?.length) return;
 
-    addGenerationSizes<T>(parents, settings, map);
+    addLevelNodesSizes(parents, settings, map);
 
-    const initialShiftLeft = getInitialTargetsShiftLeft<T>(
-      subtree,
-      parents,
-      settings,
-      map
-    );
-    let currentX = subtree.x - initialShiftLeft;
+    if (settings.orientation === "vertical") {
+      const initialShiftLeft = getInitialTargetsShiftLeft<T>(
+        subtree,
+        parents,
+        settings,
+        map
+      );
+      let currentX = subtree.x - initialShiftLeft;
 
-    const bottomLineY = getGenerationTopLineY<T>(subtree, settings, map);
+      parents.forEach((parent) => {
+        const midVerticalY =
+          subtree.groupTopY -
+          settings.sourceTargetSpacing -
+          parent.groupMaxHeight / 2;
 
-    parents.forEach((parent) => {
-      const maxHeight = getGenerationMaxHeight<T>(parent, settings, map);
-      const midVerticalY =
-        bottomLineY - settings.sourceTargetSpacing - maxHeight / 2;
+        /////////////////// BEFORES ///////////////////
+        const siblings = getFromMap(parent[settings.nextBeforeAccessor], map);
 
-      /////////////////// SIBLING
-      const siblings = getFromMap(parent[settings.nextBeforeAccessor], map);
+        siblings?.forEach((sibling) => {
+          sibling.x = currentX;
+          sibling.y = midVerticalY - sibling.height / 2;
 
-      siblings?.forEach((sibling) => {
-        sibling.x = currentX;
-        sibling.y = midVerticalY - sibling.height / 2;
+          checkContourOverlap(parentsContour, sibling, settings);
 
-        checkContourOverlap<T>(parentsContour, sibling);
+          currentX = getNodeRightX(sibling);
+        });
 
-        currentX = sibling.x + sibling.width + sibling.marginRight;
+        /////////////////// GROUP MAIN NODE
+        //set positions
+        parent.x = currentX;
+        parent.y = midVerticalY - parent.height / 2;
+
+        //check if touches one of the contours
+        checkContourOverlap(parentsContour, parent, settings);
+        currentX = getNodeRightX(parent);
+
+        /////////////////// AFTERS ///////////////////
+        getFromMap(parent[settings.nextAfterAccessor], map)?.forEach(
+          (partner) => {
+            partner.x = currentX;
+            partner.y = midVerticalY - partner.height / 2;
+
+            checkContourOverlap(parentsContour, partner, settings);
+
+            currentX = getNodeRightX(partner);
+          }
+        );
+
+        addGroupTopY(parent, settings, map);
+
+        drillParents(parent);
       });
+    } else {
+      const initialShiftTop = getInitialTargetsShiftTop<T>(
+        subtree,
+        parents,
+        settings,
+        map
+      );
+      let currentY = subtree.y - initialShiftTop;
 
-      ///////////// PARENT
-      //set positions
-      parent.x = currentX;
-      parent.y = midVerticalY - parent.height / 2;
+      parents.forEach((parent) => {
+        const midPointX =
+          subtree.groupLeftX -
+          settings.sourceTargetSpacing -
+          parent.groupMaxWidth / 2;
 
-      //check if touches one of the contours
-      checkContourOverlap<T>(parentsContour, parent);
-      currentX = parent.x + parent.width + parent.marginRight;
+        /////////////////// SIBLING
+        getFromMap(parent[settings.nextBeforeAccessor], map)?.forEach(
+          (sibling) => {
+            sibling.y = currentY;
+            sibling.x = midPointX - sibling.width / 2;
 
-      /////////////////// partners
-      parent[settings.nextAfterAccessor]?.forEach((partner) => {
-        partner.x = currentX;
-        partner.y = midVerticalY - partner.height / 2;
+            checkContourOverlap(parentsContour, sibling, settings);
 
-        checkContourOverlap<T>(parentsContour, partner);
+            currentY = getNodeBottomY(sibling);
+          }
+        );
 
-        currentX = partner.x + partner.width + partner.marginRight;
+        /////////////////// CHILD
+
+        //Set positions
+        parent.y = currentY;
+        parent.x = midPointX - parent.width / 2;
+
+        checkContourOverlap(parentsContour, parent, settings);
+        currentY = getNodeBottomY(parent);
+
+        /////////////////// partners
+        getFromMap(parent[settings.nextAfterAccessor], map)?.forEach(
+          (partner) => {
+            partner.y = currentY;
+            partner.x = midPointX - partner.width / 2;
+
+            checkContourOverlap(descendantsContour, partner, settings);
+            currentY = getNodeBottomY(partner);
+          }
+        );
+
+        addGroupLeftX(parent, settings, map);
+
+        drillParents(parent);
       });
+    }
 
-      drillParents(parent);
-    });
-
-    centerSourceToTargets<T>(subtree, parents, settings, map);
+    centerSourceToTargets(subtree, parents, settings, map);
   }
-  normalizeTree<T>(root, settings.sourcesAccessor, settings, map);
+  normalizeTree(root, settings.sourcesAccessor, settings, map);
 
   return getElements(root, settings, map);
 }

@@ -1,25 +1,23 @@
+import { getNodeRightX } from "./getNodeRightX";
 import { Settings } from "./Settings";
 import { TreeMap } from "./TreeMap";
 import { TreeNode } from "./TreeNode";
 import { getFromMap } from "./getFromMap";
 
-export function getGenerationMaxHeight<T>(
-  subtree: TreeNode<T>,
+export function addGroupRightX(
+  subtree: TreeNode,
   settings: Settings,
-  map: TreeMap<T>
+  map: TreeMap
 ) {
-  let maxHeight = subtree.height;
+  subtree.groupRightX = getNodeRightX(subtree);
 
   const siblings = getFromMap(subtree[settings.nextBeforeAccessor], map);
-
   siblings?.forEach((sibling) => {
-    maxHeight = Math.max(maxHeight, sibling.height);
+    subtree.groupRightX = Math.max(subtree.groupRightX, getNodeRightX(sibling));
   });
 
   const partners = getFromMap(subtree[settings.nextAfterAccessor], map);
-
   partners?.forEach((partner) => {
-    maxHeight = Math.max(maxHeight, partner.height);
+    subtree.groupRightX = Math.max(subtree.groupRightX, getNodeRightX(partner));
   });
-  return maxHeight;
 }
