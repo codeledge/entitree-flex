@@ -1,7 +1,7 @@
 {
   "name": "entitree-flex",
-  "version": "0.3.4",
-  "description": "Flexible Tree layout supporting ancestors, descendants and side nodes",
+  "version": "0.4.0",
+  "description": "Flexible Tree layout supporting ancestors, descendants and side nodes in all 4 orientations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "tsc",
     "prepublishOnly": "yarn build",
     "dev": "tsc --watch",
-    "browser": "watchify playground/example.js -p [ tsify ] -o playground/bundle.js"
+    "browser": "watchify playground/source.js -p [ tsify ] -o playground/bundle.js"
   },
   "files": [
     "/dist"

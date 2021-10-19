@@ -10,38 +10,37 @@ import { getFromMap } from "./getFromMap";
 // THE Os and Ps should not be counted!
 //because parent will center itself on the REAL children
 
-export const getInitialTargetsShiftLeft = (
+export const getInitialTargetsShiftTop = (
   source: TreeNode,
   targets: TreeNode[],
   settings: Settings,
   map: TreeMap
 ) => {
   return (
-    targets.reduce((totalWidth, target, index) => {
-      const siblings = getFromMap(target[settings.nextBeforeAccessor], map);
-
-      const partners = getFromMap(target[settings.nextAfterAccessor], map);
-
+    targets.reduce((totalHeight, target, index) => {
       //for the first child, we don't care about the padding (siblings) left
       if (index !== 0) {
+        const siblings = getFromMap(target[settings.nextBeforeAccessor], map);
         siblings?.forEach((node) => {
-          totalWidth += node.width + node.marginRight;
+          totalHeight += node.height + node.marginBottom;
         });
       }
 
       //do not add margin from last target
-      totalWidth +=
-        target.width + (index === targets.length - 1 ? 0 : target.marginRight);
+      totalHeight +=
+        target.height +
+        (index === targets.length - 1 ? 0 : target.marginBottom);
 
       if (index !== targets.length - 1) {
+        const partners = getFromMap(target[settings.nextAfterAccessor], map);
         partners?.forEach((partner) => {
-          totalWidth += partner.width + partner.marginRight;
+          totalHeight += partner.height + partner.marginBottom;
         });
       }
 
-      return totalWidth;
+      return totalHeight;
     }, 0) /
       2 -
-    source.width / 2
+    source.height / 2
   );
 };

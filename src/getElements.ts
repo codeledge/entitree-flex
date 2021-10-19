@@ -7,15 +7,15 @@ import { getFromMap } from "./getFromMap";
 export const getElements = <T>(
   root: TreeNode<T>,
   settings: Settings,
-  map?: TreeMap<T>
+  map: TreeMap<T>
 ): {
   map: TreeMap<T>;
+  maxBottom: number;
+  maxLeft: number;
+  maxRight: number;
+  maxTop: number;
   nodes: TreeNode<T>[];
   rels: TreeRel<T>[];
-  maxRight: number;
-  maxLeft: number;
-  maxBottom: number;
-  maxTop: number;
 } => {
   const nodes = [root];
   const rels = [];
@@ -33,9 +33,8 @@ export const getElements = <T>(
   }
 
   function processNextBefores(subtree) {
-    const nextBefores = map
-      ? getFromMap(subtree[settings.nextBeforeAccessor], map)
-      : subtree[settings.nextBeforeAccessor];
+    const nextBefores = getFromMap(subtree[settings.nextBeforeAccessor], map);
+
     nextBefores?.forEach((sibling) => {
       compare(sibling);
       nodes.push(sibling);
@@ -44,9 +43,8 @@ export const getElements = <T>(
   }
 
   function processNextAfters(subtree) {
-    const nextAfters = map
-      ? getFromMap(subtree[settings.nextAfterAccessor], map)
-      : subtree[settings.nextAfterAccessor];
+    const nextAfters = getFromMap(subtree[settings.nextAfterAccessor], map);
+
     nextAfters?.forEach((spouse) => {
       compare(spouse);
       nodes.push(spouse);
@@ -60,9 +58,8 @@ export const getElements = <T>(
     processNextAfters(subtree);
 
     if (!direction || direction === "parents") {
-      const parents = map
-        ? getFromMap(subtree[settings.sourcesAccessor], map)
-        : subtree[settings.sourcesAccessor];
+      const parents = getFromMap(subtree[settings.sourcesAccessor], map);
+
       parents?.forEach((parent) => {
         compare(parent);
         nodes.push(parent);
@@ -72,9 +69,7 @@ export const getElements = <T>(
     }
 
     if (!direction || direction === "children") {
-      const children = map
-        ? getFromMap(subtree[settings.targetsAccessor], map)
-        : subtree[settings.targetsAccessor];
+      const children = getFromMap(subtree[settings.targetsAccessor], map);
       children?.forEach((child) => {
         compare(child);
         nodes.push(child);
