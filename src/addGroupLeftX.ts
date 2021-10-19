@@ -15,6 +15,6 @@ export function addGroupLeftX(
   });
 
   getFromMap(subtree[settings.nextAfterAccessor], map)?.forEach((partner) => {
-    subtree.groupLeftX = Math.max(subtree.groupLeftX, partner.x);
+    subtree.groupLeftX = Math.min(subtree.groupLeftX, partner.x);
   });
 }

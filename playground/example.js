@@ -1,10 +1,10 @@
 const { layoutFromMap } = require("../src/index.ts");
 const flatTree = require("./flatTree.ts").default;
-// const { randomTree } = require("../fixtures/randomTree");
+const { randomTree } = require("../fixtures/randomTree");
 
 var draw = SVG().addTo("body");
 
-const { nodes, rels } = layoutFromMap("1", flatTree, {
+const { nodes, rels } = layoutFromMap(1, randomTree(), {
   rootX: window.innerWidth / 2,
   rootY: window.innerHeight / 2,
   sourceTargetSpacing: 20,
@@ -37,7 +37,7 @@ function drawNode(node) {
     .move(node.x, node.y)
     .fill(stringToColour(node.name));
 
-  draw.text(node.name).move(node.x, node.y);
+  //draw.text(node.name).move(node.x, node.y);
 }
 
 function stringToColour(str) {

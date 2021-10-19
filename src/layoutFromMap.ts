@@ -240,7 +240,7 @@ export function layoutFromMap<T>(
           }
         );
 
-        /////////////////// CHILD
+        /////////////////// PARENT
 
         //Set positions
         parent.y = currentY;
@@ -249,13 +249,13 @@ export function layoutFromMap<T>(
         checkContourOverlap(parentsContour, parent, settings);
         currentY = getNodeBottomY(parent);
 
-        /////////////////// partners
+        /////////////////// SPOUSES
         getFromMap(parent[settings.nextAfterAccessor], map)?.forEach(
           (partner) => {
             partner.y = currentY;
             partner.x = midPointX - partner.width / 2;
 
-            checkContourOverlap(descendantsContour, partner, settings);
+            checkContourOverlap(parentsContour, partner, settings);
             currentY = getNodeBottomY(partner);
           }
         );
