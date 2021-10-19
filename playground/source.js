@@ -8,7 +8,7 @@ const { nodes, rels } = layoutFromMap(1, randomTree(), {
   rootX: window.innerWidth / 2,
   rootY: window.innerHeight / 2,
   sourceTargetSpacing: 20,
-  orientation: "horizontal",
+  //orientation: "horizontal",
 });
 
 //console.log(nodes);

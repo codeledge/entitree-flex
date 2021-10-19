@@ -10,11 +10,11 @@ import { getFromMap } from "./getFromMap";
 // THE Os and Ps should not be counted!
 //because parent will center itself on the REAL children
 
-export const getInitialTargetsShiftTop = <T>(
-  source: TreeNode<T>,
-  targets: TreeNode<T>[],
+export const getInitialTargetsShiftTop = (
+  source: TreeNode,
+  targets: TreeNode[],
   settings: Settings,
-  map: TreeMap<T>
+  map: TreeMap
 ) => {
   return (
     targets.reduce((totalHeight, target, index) => {

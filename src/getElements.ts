@@ -10,12 +10,12 @@ export const getElements = <T>(
   map: TreeMap<T>
 ): {
   map: TreeMap<T>;
+  maxBottom: number;
+  maxLeft: number;
+  maxRight: number;
+  maxTop: number;
   nodes: TreeNode<T>[];
   rels: TreeRel<T>[];
-  maxRight: number;
-  maxLeft: number;
-  maxBottom: number;
-  maxTop: number;
 } => {
   const nodes = [root];
   const rels = [];

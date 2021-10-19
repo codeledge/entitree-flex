@@ -31,75 +31,6 @@ yarn add entitree-flex
 
 It does come with TS definitions
 
-## Usage from nested object
-
-```
-const { layoutFromNested } = require("entitree-flex")
-//or
-import { layoutFromNested } from "entitree-flex"
-
-const tree = {
-  name: "root",
-  width: 60,
-  height: 20,
-  siblings: [
-    { name: "rootSibling1" },
-    { name: "rootSibling2"},
-  ],
-  partners: [{ name: "rootPartner1" }, { name: "rootPartner2" }],
-  children: [
-    {
-      name: "child1",
-      width: 20,
-      height: 50,
-      partners: [
-        {
-          name: "child1partner1",
-        },
-      ],
-      children: [
-        {
-          name: "grandchild1",
-          children: [
-            {
-              name: "grandGrandchild1",
-            },
-          ],
-        },
-        {
-          name: "grandchild2",
-        },
-      ],
-    },
-  ],
-  parents: [
-    {
-      name: "parent1",
-      parents: [
-        {
-          name: "grandParent1",
-        },
-        {
-          name: "grandParent2",
-        },
-      ],
-    },
-    {
-      name: "parent1",
-      parents: [
-        {
-          name: "grandparent1",
-        },
-      ],
-    },
-  ],
-};
-
-layoutFromNested(tree [, settings])
-```
-
-and the object will be populated with all the coordinates for a flexible, bidirectional, side-nodes supporting tree
-
 ## Usage from flat object
 
 ```
@@ -120,10 +51,20 @@ const flatTree = {
   6: { name: "spouse of child 3" },
 };
 
-layoutFromMap(1, flatTree [, settings])
+const { map, maxBottom, maxLeft, maxRight, maxTop, nodes, rels } = layoutFromMap(1, flatTree [, settings])
 ```
 
+## Playground
+
+You can play live in your browser with random trees or make your own tree for testing.
+
+Just run `yarn browser` and then open the file `playground/index.html` in your broser and see the results.
+
+Edit the `playground/source.js` file to see changes.
+
 ## Settings
+
+Structure and defaults of the settings
 
 ```
 defaultSettings = {
@@ -139,9 +80,10 @@ defaultSettings = {
   nodeWidth: 40, // default node width in px
   rootX: 0, // set root position if other than 0
   rootY: 0, // set root position if other than 0
-  sourcesAccessor: "parents", // the prop used to go up the ancestors
+  sourcesAccessor: "parents", // the prop used as the array of ancestors ids
   sourceTargetSpacing: 10, // the "vertical" spacing in vertical layout
-  targetsAccessor: "children", // what prop to use to pick up children
+  targetsAccessor: "children", // the prop used as the array of children ids
+  orientation: "vertical", // "vertical" to see parents top and children bottom, "horizontal" to see parents left and children right
 };
 ```
 
