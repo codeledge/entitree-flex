@@ -1,4 +1,4 @@
-import { defaultSettings } from "../src";
+import { defaultSettings } from "../src/defaultSettings";
 import { makeRoot } from "../src/makeRoot";
 
 test("makeRoot", () => {

@@ -1,3 +1,5 @@
+import { getNodeBottomY } from "./getNodeBottomY";
+import { getNodeRightX } from "./getNodeRightX";
 import { getFromMap } from "./getFromMap";
 import { Settings } from "./Settings";
 import { TreeMap } from "./TreeMap";
@@ -14,8 +16,7 @@ export const addRootSpousesPositions = <T>(
         const previousNode = nextAfters[nextAfterIndex - 1] || root;
 
         if (settings.orientation === "vertical") {
-          currentNode.x =
-            previousNode.x + previousNode.width + previousNode.marginRight;
+          currentNode.x = getNodeRightX(previousNode);
           // align vertically
           currentNode.y = root.y + root.height / 2 - currentNode.height / 2;
 
@@ -24,8 +25,7 @@ export const addRootSpousesPositions = <T>(
           if (currentNode.y < root.groupTopY) root.groupTopY = currentNode.y;
           if (bottomEdgeY > root.groupBottomY) root.groupBottomY = bottomEdgeY;
         } else {
-          currentNode.y =
-            previousNode.y + previousNode.height + previousNode.marginBottom;
+          currentNode.y = getNodeBottomY(previousNode);
           // align horizontally
           currentNode.x = root.x + root.width / 2 - currentNode.width / 2;
 

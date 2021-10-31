@@ -1,16 +1,21 @@
 export type TreeNode<T extends {} = {}> = T & {
-  isAncestor?: boolean;
-  isDescendant?: boolean;
-  isRoot?: boolean;
-  marginBottom: number;
-  marginRight: number;
-  groupTopY: number;
   groupBottomY: number;
   groupLeftX: number;
-  groupRightX: number;
   groupMaxHeight: number;
   groupMaxWidth: number;
+  groupRightX: number;
+  groupTopY: number;
   height: number;
+  isAncestor?: boolean;
+  isDescendant?: boolean;
+  isNext?: boolean;
+  isNextAfter?: boolean;
+  isNextBefore?: boolean;
+  isRoot?: boolean;
+  isSource?: boolean;
+  isTarget?: boolean;
+  marginBottom: number;
+  marginRight: number;
   width: number;
   x: number;
   y: number;

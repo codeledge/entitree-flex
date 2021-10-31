@@ -5,11 +5,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "jest",
+    "browser": "open playground/index.html && watchify playground/source.js -p [ tsify ] -o playground/bundle.js",
     "build": "tsc",
-    "prepublishOnly": "yarn build",
     "dev": "tsc --watch",
-    "browser": "watchify playground/source.js -p [ tsify ] -o playground/bundle.js"
+    "prepublishOnly": "yarn build",
+    "test": "jest"
   },
   "files": [
     "/dist"
