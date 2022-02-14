@@ -93,3 +93,9 @@ defaultSettings = {
 
 - https://github.com/d3/d3-hierarchy no bidirectional, no flexible, no side nodes
 - https://github.com/Klortho/d3-flextree no bidirectional, no side nodes
+
+## License
+
+GNU General Public License v3.0
+
+Copyright (c) 2022, Codeledge
