@@ -1,6 +1,6 @@
 {
   "name": "entitree-flex",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Flexible Tree layout supporting ancestors, descendants and side nodes in all 4 orientations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,6 @@
     "type": "git",
     "url": "https://github.com/codeledge/entitree-flex"
   },
-  "license": "ISC",
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.14.6",
